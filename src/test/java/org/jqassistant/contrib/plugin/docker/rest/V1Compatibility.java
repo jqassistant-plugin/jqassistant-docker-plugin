@@ -1,8 +1,7 @@
 package org.jqassistant.contrib.plugin.docker.rest;
 
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -11,15 +10,17 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class Manifest {
+public class V1Compatibility {
 
-    private String name;
+    private String parent;
 
-    private String tag;
+    private String id;
 
     private String architecture;
 
-    private List<FileSystemLayer> fsLayers;
+    private String os;
 
-    private List<History> history;
+    @JsonProperty("docker_version")
+    private String dockerVersion;
+
 }
