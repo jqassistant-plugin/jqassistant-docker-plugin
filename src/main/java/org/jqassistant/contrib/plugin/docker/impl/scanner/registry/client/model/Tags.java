@@ -1,4 +1,4 @@
-package org.jqassistant.contrib.plugin.docker.rest;
+package org.jqassistant.contrib.plugin.docker.impl.scanner.registry.client.model;
 
 import java.util.List;
 
@@ -11,8 +11,8 @@ import lombok.ToString;
 @ToString
 public class Tags {
 
-    private String name;
+	private String name;
 
-    private List<String> tags;
+	private List<String> tags;
 
 }

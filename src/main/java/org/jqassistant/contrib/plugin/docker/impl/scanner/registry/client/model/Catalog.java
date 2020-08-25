@@ -1,4 +1,4 @@
-package org.jqassistant.contrib.plugin.docker.rest;
+package org.jqassistant.contrib.plugin.docker.impl.scanner.registry.client.model;
 
 import java.util.List;
 
@@ -11,6 +11,6 @@ import lombok.ToString;
 @ToString
 public class Catalog {
 
-    private List<String> repositories;
+	private List<String> repositories;
 
 }

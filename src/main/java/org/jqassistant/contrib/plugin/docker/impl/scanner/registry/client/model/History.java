@@ -1,4 +1,4 @@
-package org.jqassistant.contrib.plugin.docker.rest;
+package org.jqassistant.contrib.plugin.docker.impl.scanner.registry.client.model;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -9,6 +9,6 @@ import lombok.ToString;
 @ToString
 public class History {
 
-    private String v1Compatibility;
+	private String v1Compatibility;
 
 }

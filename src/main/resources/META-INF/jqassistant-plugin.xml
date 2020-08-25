@@ -1,0 +1,20 @@
+<jqassistant-plugin xmlns="http://schema.jqassistant.org/plugin/v1.8"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://schema.jqassistant.org/plugin/v1.8 https://schema.jqassistant.org/plugin/jqassistant-plugin-v1.8.xsd"
+                    name="Docker">
+    <description>Provides a scanner for maven repositories.</description>
+    <model>
+        <class>org.jqassistant.contrib.plugin.docker.api.model.DockerRegistryDescriptor</class>
+        <class>org.jqassistant.contrib.plugin.docker.api.model.DockerRepositoryDescriptor</class>
+        <class>org.jqassistant.contrib.plugin.docker.api.model.DockerTagDescriptor</class>
+        <class>org.jqassistant.contrib.plugin.docker.api.model.DockerManifestDescriptor</class>
+        <class>org.jqassistant.contrib.plugin.docker.api.model.DockerBlobDescriptor</class>
+        <class>org.jqassistant.contrib.plugin.docker.api.model.ManifestContainsBlobDescriptor</class>
+    </model>
+    <scope>
+        <class>org.jqassistant.contrib.plugin.docker.api.scope.DockerScope</class>
+    </scope>
+    <scanner>
+        <class>org.jqassistant.contrib.plugin.docker.impl.scanner.registry.DockerRegistryScannerPlugin</class>
+    </scanner>
+</jqassistant-plugin>

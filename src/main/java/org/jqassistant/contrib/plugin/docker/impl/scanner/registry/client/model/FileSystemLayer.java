@@ -1,4 +1,4 @@
-package org.jqassistant.contrib.plugin.docker.rest;
+package org.jqassistant.contrib.plugin.docker.impl.scanner.registry.client.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -12,6 +12,6 @@ import lombok.ToString;
 @ToString
 public class FileSystemLayer {
 
-    private String blobSum;
+	private String blobSum;
 
 }
