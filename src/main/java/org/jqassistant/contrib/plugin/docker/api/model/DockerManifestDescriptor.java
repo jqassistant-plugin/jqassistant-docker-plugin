@@ -10,5 +10,5 @@ public interface DockerManifestDescriptor extends DockerDescriptor {
 	String getDigest();
 
 	void setDigest(String digest);
-	List<ManifestContainsBlobDescriptor> getContainsBlobs();
+	List<ManifestContainsLayerDescriptor> getContainsBlobs();
 }

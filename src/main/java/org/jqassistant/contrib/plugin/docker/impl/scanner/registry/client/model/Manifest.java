@@ -1,7 +1,6 @@
 package org.jqassistant.contrib.plugin.docker.impl.scanner.registry.client.model;
 
 import java.util.List;
-import java.util.Optional;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -15,15 +14,27 @@ import lombok.ToString;
 @ToString
 public class Manifest {
 
+	public static final String HEADER_DOCKER_CONTENT_DIGEST = "Docker-Content-Digest";
+
+	public static final String MEDIA_TYPE = "application/vnd.docker.distribution.manifest.v2+json";
+
 	private String digest;
 
-	private String name;
+	private BlobReference config;
 
-	private String tag;
+	private List<BlobReference> layers;
 
-	private String architecture;
+	@JsonIgnoreProperties(ignoreUnknown = true)
+	@Getter
+	@Setter
+	@ToString
+	public static class BlobReference {
 
-	private Optional<List<FileSystemLayer>> fsLayers;
+		private String mediaType;
 
-	private Optional<List<History>> history;
+		private long size;
+
+		private String digest;
+
+	}
 }

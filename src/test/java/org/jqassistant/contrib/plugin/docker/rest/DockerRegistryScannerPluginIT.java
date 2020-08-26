@@ -14,7 +14,7 @@ public class DockerRegistryScannerPluginIT extends AbstractPluginIT {
 	@Test
 	@TestStore(type = TestStore.Type.FILE)
 	public void scanRegistry() throws MalformedURLException {
-		String url = "http://localhost:5000";
+		 String url = "http://localhost:5000";
 		DockerRegistryDescriptor registryDescriptor = getScanner().scan(new URL(url), url, DockerScope.REGISTRY);
 	}
 

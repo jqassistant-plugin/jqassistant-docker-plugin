@@ -5,8 +5,8 @@ import com.buschmais.xo.neo4j.api.annotation.Relation;
 import com.buschmais.xo.neo4j.api.annotation.Relation.Incoming;
 import com.buschmais.xo.neo4j.api.annotation.Relation.Outgoing;
 
-@Relation("CONTAINS_BLOB")
-public interface ManifestContainsBlobDescriptor extends Descriptor  {
+@Relation("CONTAINS_LAYER")
+public interface ManifestContainsLayerDescriptor extends Descriptor  {
 
 	int getIndex();
 
