@@ -1,8 +1,10 @@
 package org.jqassistant.contrib.plugin.docker.impl.scanner.registry.client.model;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -37,4 +39,22 @@ public class Manifest {
 		private String digest;
 
 	}
+
+	@JsonIgnoreProperties(ignoreUnknown = true)
+	@Getter
+	@Setter
+	@ToString
+	public static class Config {
+
+	    private String architecture;
+
+        private String os;
+
+        @JsonProperty("docker_version")
+	    private String dockerVersion;
+
+	    private ZonedDateTime created;
+
+	}
+
 }

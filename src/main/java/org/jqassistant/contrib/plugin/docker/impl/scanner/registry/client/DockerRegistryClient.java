@@ -10,6 +10,7 @@ import javax.ws.rs.core.MediaType;
 
 import org.jqassistant.contrib.plugin.docker.impl.scanner.registry.client.model.Catalog;
 import org.jqassistant.contrib.plugin.docker.impl.scanner.registry.client.model.Manifest;
+import org.jqassistant.contrib.plugin.docker.impl.scanner.registry.client.model.ManifestConfigMessageBodyReader;
 import org.jqassistant.contrib.plugin.docker.impl.scanner.registry.client.model.ManifestMessageBodyReader;
 import org.jqassistant.contrib.plugin.docker.impl.scanner.registry.client.model.Tags;
 
@@ -24,7 +25,7 @@ public class DockerRegistryClient {
 
 	public DockerRegistryClient(URI uri) {
 		DefaultClientConfig clientConfig = new DefaultClientConfig(ObjectMapperProvider.class,
-				ManifestMessageBodyReader.class);
+				ManifestMessageBodyReader.class, ManifestConfigMessageBodyReader.class);
 		Client client = Client.create(clientConfig);
 		this.resource = client.resource(uri).path("v2");
 	}
@@ -50,7 +51,12 @@ public class DockerRegistryClient {
 		return Optional.empty();
 	}
 
-	private <T> T get(WebResource resource, URI uri, Class<T> responseType, String... mediaTypes) {
-		return resource.uri(uri).accept(mediaTypes).get(responseType);
+	public <T> T getBlob(String repository, String digest, Class<T> type, String mediaType) {
+		URI blobUri = resource.getUriBuilder().path(repository).path("blobs").path(digest).build();
+		return get(resource, blobUri, type, mediaType);
+	}
+
+	private <T> T get(WebResource resource, URI uri, Class<T> responseType, String mediaType) {
+		return resource.uri(uri).accept(mediaType).get(responseType);
 	}
 }

@@ -55,8 +55,8 @@ public class DockerRegistryScannerPlugin extends AbstractScannerPlugin<URL, Dock
 				DockerTagDescriptor dockerTagDescriptor = repositoryDescriptor.resolveTag(tag);
 				if (dockerTagDescriptor.getManifest() == null) {
 					Optional<Manifest> manifest = registryClient.getManifest(repository, tag);
-					manifest.ifPresent(m -> dockerTagDescriptor
-							.setManifest(resolveManifest(m, registryDescriptor, blobDescriptorCache, context)));
+					manifest.ifPresent(m -> dockerTagDescriptor.setManifest(resolveManifest(repository, m,
+							registryDescriptor, blobDescriptorCache, registryClient, context)));
 				}
 			}
 		}
@@ -64,8 +64,9 @@ public class DockerRegistryScannerPlugin extends AbstractScannerPlugin<URL, Dock
 		return registryDescriptor;
 	}
 
-	private DockerManifestDescriptor resolveManifest(Manifest manifest, DockerRegistryDescriptor registryDescriptor,
-			Cache<String, DockerBlobDescriptor> blobDescriptorCache, ScannerContext context) {
+	private DockerManifestDescriptor resolveManifest(String repository, Manifest manifest,
+			DockerRegistryDescriptor registryDescriptor, Cache<String, DockerBlobDescriptor> blobDescriptorCache,
+			DockerRegistryClient registryClient, ScannerContext context) {
 		Map<String, Object> params = new HashMap<>();
 		params.put("digest", manifest.getDigest());
 		Query.Result<Query.Result.CompositeRowObject> result = context.getStore()
@@ -75,8 +76,19 @@ public class DockerRegistryScannerPlugin extends AbstractScannerPlugin<URL, Dock
 		}
 		DockerManifestDescriptor manifestDescriptor = context.getStore().create(DockerManifestDescriptor.class);
 		manifestDescriptor.setDigest(manifest.getDigest());
+		resolveConfig(repository, manifest.getConfig(), manifestDescriptor, registryClient, context);
 		resolveLayers(manifest.getLayers(), registryDescriptor, manifestDescriptor, blobDescriptorCache, context);
 		return manifestDescriptor;
+	}
+
+	private void resolveConfig(String repository, Manifest.BlobReference configBlobReference,
+			DockerManifestDescriptor manifestDescriptor, DockerRegistryClient registryClient, ScannerContext context) {
+		Manifest.Config config = registryClient.getBlob(repository, configBlobReference.getDigest(),
+				Manifest.Config.class, configBlobReference.getMediaType());
+		manifestDescriptor.setArchitecture(config.getArchitecture());
+		manifestDescriptor.setOs(config.getOs());
+		manifestDescriptor.setDockerVersion(config.getDockerVersion());
+		manifestDescriptor.setCreated(config.getCreated().toInstant().toEpochMilli());
 	}
 
 	private void resolveLayers(List<Manifest.BlobReference> layers, DockerRegistryDescriptor registryDescriptor,
