@@ -78,17 +78,20 @@ public class DockerRegistryScannerPlugin extends AbstractScannerPlugin<URL, Dock
 		manifestDescriptor.setDigest(manifest.getDigest());
 		resolveConfig(repository, manifest.getConfig(), manifestDescriptor, registryClient, context);
 		resolveLayers(manifest.getLayers(), registryDescriptor, manifestDescriptor, blobDescriptorCache, context);
+
+
+
 		return manifestDescriptor;
 	}
 
 	private void resolveConfig(String repository, Manifest.BlobReference configBlobReference,
 			DockerManifestDescriptor manifestDescriptor, DockerRegistryClient registryClient, ScannerContext context) {
-		Manifest.Config config = registryClient.getBlob(repository, configBlobReference.getDigest(),
-				Manifest.Config.class, configBlobReference.getMediaType());
-		manifestDescriptor.setArchitecture(config.getArchitecture());
-		manifestDescriptor.setOs(config.getOs());
-		manifestDescriptor.setDockerVersion(config.getDockerVersion());
-		manifestDescriptor.setCreated(config.getCreated().toInstant().toEpochMilli());
+		Manifest.Content content = registryClient.getBlob(repository, configBlobReference.getDigest(),
+				Manifest.Content.class, configBlobReference.getMediaType());
+		manifestDescriptor.setArchitecture(content.getArchitecture());
+		manifestDescriptor.setOs(content.getOs());
+		manifestDescriptor.setDockerVersion(content.getDockerVersion());
+		manifestDescriptor.setCreated(content.getCreated().toInstant().toEpochMilli());
 	}
 
 	private void resolveLayers(List<Manifest.BlobReference> layers, DockerRegistryDescriptor registryDescriptor,

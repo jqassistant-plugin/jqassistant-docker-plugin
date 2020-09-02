@@ -18,7 +18,7 @@ import javax.ws.rs.ext.Providers;
 
 @Provider
 @Consumes(MediaType.APPLICATION_OCTET_STREAM)
-public class ManifestConfigMessageBodyReader implements MessageBodyReader<Manifest.Config> {
+public class ManifestConfigMessageBodyReader implements MessageBodyReader<Manifest.Content> {
 
 	private final Providers providers;
 
@@ -32,10 +32,10 @@ public class ManifestConfigMessageBodyReader implements MessageBodyReader<Manife
 	}
 
 	@Override
-	public Manifest.Config readFrom(Class<Manifest.Config> type, Type genericType, Annotation[] annotations,
-			MediaType mediaType, MultivaluedMap<String, String> httpHeaders, InputStream entityStream)
+	public Manifest.Content readFrom(Class<Manifest.Content> type, Type genericType, Annotation[] annotations,
+                                     MediaType mediaType, MultivaluedMap<String, String> httpHeaders, InputStream entityStream)
 			throws IOException, WebApplicationException {
-		MessageBodyReader<Manifest.Config> delegate = providers.getMessageBodyReader(type, genericType, annotations,
+		MessageBodyReader<Manifest.Content> delegate = providers.getMessageBodyReader(type, genericType, annotations,
 				APPLICATION_JSON_TYPE);
 		return delegate.readFrom(type, genericType, annotations, APPLICATION_JSON_TYPE, httpHeaders, entityStream);
 	}
