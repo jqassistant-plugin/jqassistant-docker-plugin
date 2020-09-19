@@ -10,6 +10,9 @@
         <class>org.jqassistant.contrib.plugin.docker.api.model.DockerManifestDescriptor</class>
         <class>org.jqassistant.contrib.plugin.docker.api.model.DockerBlobDescriptor</class>
         <class>org.jqassistant.contrib.plugin.docker.api.model.ManifestContainsLayerDescriptor</class>
+        <class>org.jqassistant.contrib.plugin.docker.api.model.DockerConfigDescriptor</class>
+        <class>org.jqassistant.contrib.plugin.docker.api.model.DockerContainerConfigDescriptor</class>
+        <class>org.jqassistant.contrib.plugin.docker.api.model.DockerLabelDescriptor</class>
     </model>
     <scope>
         <class>org.jqassistant.contrib.plugin.docker.api.scope.DockerScope</class>

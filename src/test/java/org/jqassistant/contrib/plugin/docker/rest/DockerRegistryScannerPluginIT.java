@@ -4,6 +4,7 @@ import com.buschmais.jqassistant.plugin.common.test.AbstractPluginIT;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.model.Image;
 import com.github.dockerjava.core.command.PushImageResultCallback;
+import lombok.extern.slf4j.Slf4j;
 import org.jqassistant.contrib.plugin.docker.api.model.*;
 import org.jqassistant.contrib.plugin.docker.api.scope.DockerScope;
 import org.junit.jupiter.api.Test;
@@ -20,10 +21,12 @@ import java.util.concurrent.ExecutionException;
 import static java.util.Arrays.stream;
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Slf4j
 @Testcontainers
 public class DockerRegistryScannerPluginIT extends AbstractPluginIT {
 
     public static final String JQA_TEST_IMAGE = "test-image";
+
     @Container
     public GenericContainer registry = new GenericContainer("registry:latest")
         .withExposedPorts(5000);
@@ -32,12 +35,9 @@ public class DockerRegistryScannerPluginIT extends AbstractPluginIT {
     @TestStore(type = TestStore.Type.FILE)
     public void scanRegistry() throws MalformedURLException, ExecutionException, InterruptedException {
         DockerClient dockerClient = registry.getDockerClient();
-        getOrCreateLocalImage(dockerClient);
-
+        createImage(dockerClient, JQA_TEST_IMAGE, "latest");
         String repositoryUrl = registry.getHost() + ":" + registry.getFirstMappedPort();
-        dockerClient.tagImageCmd(JQA_TEST_IMAGE, repositoryUrl + "/" + JQA_TEST_IMAGE, "latest").exec();
-        String taggedImageId = repositoryUrl + "/" + JQA_TEST_IMAGE + ":latest";
-        dockerClient.pushImageCmd(taggedImageId).exec(new PushImageResultCallback());
+        String taggedImageId = pushToRegistry(dockerClient, repositoryUrl, JQA_TEST_IMAGE, "latest");
 
         try {
             String url = "http://" + repositoryUrl;
@@ -65,16 +65,28 @@ public class DockerRegistryScannerPluginIT extends AbstractPluginIT {
         }
     }
 
-    private void getOrCreateLocalImage(DockerClient dockerClient) throws InterruptedException, ExecutionException {
+    private void createImage(DockerClient dockerClient, String imageId, String label) throws InterruptedException, ExecutionException {
         List<Image> images = dockerClient.listImagesCmd().exec();
-        if (!images.stream().flatMap(image -> stream(image.getRepoTags())).filter(tag -> JQA_TEST_IMAGE.equals(tag)).findAny().isPresent()) {
+        String repoTag = imageId + ":" + label;
+        if (!images.stream().flatMap(image -> stream(image.getRepoTags() != null ? image.getRepoTags() : new String[0])).filter(tag -> repoTag.equals(tag)).findAny().isPresent()) {
+            log.info("Local test image not found, creating it.");
             ImageFromDockerfile image = new ImageFromDockerfile(JQA_TEST_IMAGE, false)
                 .withDockerfileFromBuilder(builder ->
                     builder
                         .from("alpine:3.2")
                         .cmd("echo", "Hello", "World;")
+                        .expose(80, 8080)
+                        .volume("/data", "/log")
                         .build());
             image.get();
         }
     }
+
+    private String pushToRegistry(DockerClient dockerClient, String repositoryUrl, String imageId, String label) {
+        dockerClient.tagImageCmd(imageId + ":" + label, repositoryUrl + "/" + imageId, label).exec();
+        String repositoryImageId = repositoryUrl + "/" + imageId + ":" + label;
+        dockerClient.pushImageCmd(repositoryImageId).exec(new PushImageResultCallback());
+        return repositoryImageId;
+    }
+
 }

@@ -81,7 +81,7 @@ public class Manifest {
         private String hostName;
 
         @JsonProperty("Domainname")
-        private String domainname;
+        private String domainName;
 
         @JsonProperty("User")
         private String user;
@@ -108,10 +108,10 @@ public class Manifest {
         private Boolean stdinOnce;
 
         @JsonProperty("Env")
-        private List<String> env;
+        private String[] env;
 
         @JsonProperty("Cmd")
-        private List<String> cmd;
+        private String[] cmd;
 
         @JsonProperty("ArgsEscaped")
         private Boolean argsEscaped;
@@ -126,13 +126,13 @@ public class Manifest {
         private String workingDir;
 
         @JsonProperty("EntryPoint")
-        private List<String> entrypoint;
+        private String[] entrypoint;
 
         @JsonProperty("onBuild")
         private String onBuild;
 
         @JsonProperty("Labels")
-        private Map<String, Object> labels;
+        private Map<String, String> labels;
 
     }
 }
