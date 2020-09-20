@@ -1,15 +1,16 @@
 package org.jqassistant.contrib.plugin.docker.impl.scanner.registry.client.model;
 
-import com.fasterxml.jackson.annotation.JsonAnySetter;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
-
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Getter
@@ -17,122 +18,124 @@ import java.util.Map;
 @ToString
 public class Manifest {
 
-    public static final String HEADER_DOCKER_CONTENT_DIGEST = "Docker-Content-Digest";
+	public static final String HEADER_DOCKER_CONTENT_DIGEST = "Docker-Content-Digest";
 
-    public static final String MEDIA_TYPE = "application/vnd.docker.distribution.manifest.v2+json";
+	public static final String MEDIA_TYPE = "application/vnd.docker.distribution.manifest.v2+json";
 
-    private String digest;
+	private String digest;
 
-    private BlobReference config;
+	private BlobReference config;
 
-    private List<BlobReference> layers;
+	private List<BlobReference> layers;
 
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    @Getter
-    @Setter
-    @ToString
-    public static class BlobReference {
+	@JsonIgnoreProperties(ignoreUnknown = true)
+	@Getter
+	@Setter
+	@ToString
+	@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+	public static class BlobReference {
 
-        private String mediaType;
+		private String mediaType;
 
-        private long size;
+		private long size;
 
-        private String digest;
+		@EqualsAndHashCode.Include
+		private String digest;
 
-    }
+	}
 
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    @Getter
-    @Setter
-    @ToString
-    public static class Content {
+	@JsonIgnoreProperties(ignoreUnknown = true)
+	@Getter
+	@Setter
+	@ToString
+	public static class Content {
 
-        private String id;
+		private String id;
 
-        private String parent;
+		private String parent;
 
-        private String architecture;
+		private String architecture;
 
-        private String os;
+		private String os;
 
-        @JsonProperty("docker_version")
-        private String dockerVersion;
+		@JsonProperty("docker_version")
+		private String dockerVersion;
 
-        private ZonedDateTime created;
+		private ZonedDateTime created;
 
-        private Config config;
+		private Config config;
 
-        private String container;
+		private String container;
 
-        @JsonProperty("container_config")
-        private Config containerConfig;
+		@JsonProperty("container_config")
+		private Config containerConfig;
 
-        private Boolean throwaway;
+		private Boolean throwaway;
 
-    }
+	}
 
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    @Getter
-    @Setter
-    @ToString
-    public static class Config {
+	@JsonIgnoreProperties(ignoreUnknown = true)
+	@Getter
+	@Setter
+	@ToString
+	public static class Config {
 
-        @JsonProperty("Hostname")
-        private String hostName;
+		@JsonProperty("Hostname")
+		private String hostName;
 
-        @JsonProperty("Domainname")
-        private String domainName;
+		@JsonProperty("Domainname")
+		private String domainName;
 
-        @JsonProperty("User")
-        private String user;
+		@JsonProperty("User")
+		private String user;
 
-        @JsonProperty("AttachStdin")
-        private Boolean attachStdin;
+		@JsonProperty("AttachStdin")
+		private Boolean attachStdin;
 
-        @JsonProperty("AttachStdout")
-        private Boolean attachStdout;
+		@JsonProperty("AttachStdout")
+		private Boolean attachStdout;
 
-        @JsonProperty("AttachStderr")
-        private Boolean attachStderr;
+		@JsonProperty("AttachStderr")
+		private Boolean attachStderr;
 
-        @JsonProperty("ExposedPorts")
-        private Map<String, Object> exposedPorts;
+		@JsonProperty("ExposedPorts")
+		private Map<String, Object> exposedPorts;
 
-        @JsonProperty("Tty")
-        private Boolean tty;
+		@JsonProperty("Tty")
+		private Boolean tty;
 
-        @JsonProperty("OpenStdin")
-        private Boolean openStdin;
+		@JsonProperty("OpenStdin")
+		private Boolean openStdin;
 
-        @JsonProperty("StdinOnce")
-        private Boolean stdinOnce;
+		@JsonProperty("StdinOnce")
+		private Boolean stdinOnce;
 
-        @JsonProperty("Env")
-        private String[] env;
+		@JsonProperty("Env")
+		private String[] env;
 
-        @JsonProperty("Cmd")
-        private String[] cmd;
+		@JsonProperty("Cmd")
+		private String[] cmd;
 
-        @JsonProperty("ArgsEscaped")
-        private Boolean argsEscaped;
+		@JsonProperty("ArgsEscaped")
+		private Boolean argsEscaped;
 
-        @JsonProperty("Image")
-        private String image;
+		@JsonProperty("Image")
+		private String image;
 
-        @JsonProperty("Volumes")
-        private Map<String, Object> volumes;
+		@JsonProperty("Volumes")
+		private Map<String, Object> volumes;
 
-        @JsonProperty("WorkingDir")
-        private String workingDir;
+		@JsonProperty("WorkingDir")
+		private String workingDir;
 
-        @JsonProperty("EntryPoint")
-        private String[] entrypoint;
+		@JsonProperty("EntryPoint")
+		private String[] entrypoint;
 
-        @JsonProperty("onBuild")
-        private String onBuild;
+		@JsonProperty("onBuild")
+		private String onBuild;
 
-        @JsonProperty("Labels")
-        private Map<String, String> labels;
+		@JsonProperty("Labels")
+		private Map<String, String> labels;
 
-    }
+	}
 }

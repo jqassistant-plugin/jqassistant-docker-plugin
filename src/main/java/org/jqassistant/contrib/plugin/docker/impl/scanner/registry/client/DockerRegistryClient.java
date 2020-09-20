@@ -1,11 +1,13 @@
 package org.jqassistant.contrib.plugin.docker.impl.scanner.registry.client;
 
+import static java.time.Duration.ofSeconds;
 import static org.jqassistant.contrib.plugin.docker.impl.scanner.registry.client.model.Manifest.HEADER_DOCKER_CONTENT_DIGEST;
 import static org.jqassistant.contrib.plugin.docker.impl.scanner.registry.client.model.Manifest.MEDIA_TYPE;
 
 import java.net.URI;
 import java.util.Optional;
 
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 
 import org.jqassistant.contrib.plugin.docker.impl.scanner.registry.client.model.Catalog;
@@ -16,10 +18,20 @@ import org.jqassistant.contrib.plugin.docker.impl.scanner.registry.client.model.
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 
+import lombok.extern.slf4j.Slf4j;
+import net.jodah.failsafe.Failsafe;
+import net.jodah.failsafe.RetryPolicy;
+
+@Slf4j
 public class DockerRegistryClient {
+
+	public static final String USER_AGENT = "jQAssistant/1.x";
+
+	private static final int HTTP_NOT_FOUND = 404;
 
 	private final WebResource resource;
 
@@ -51,12 +63,27 @@ public class DockerRegistryClient {
 		return Optional.empty();
 	}
 
-	public <T> T getBlob(String repository, String digest, Class<T> type, String mediaType) {
+	public <T> Optional<T> getBlob(String repository, String digest, Class<T> type, String mediaType) {
 		URI blobUri = resource.getUriBuilder().path(repository).path("blobs").path(digest).build();
-		return get(resource, blobUri, type, mediaType);
+		return getOptional(resource, blobUri, type, mediaType);
+	}
+
+	private <T> Optional<T> getOptional(WebResource resource, URI uri, Class<T> responseType, String mediaType) {
+		try {
+			return Optional.of(get(resource, uri, responseType, mediaType));
+		} catch (UniformInterfaceException e) {
+			if (e.getResponse().getStatus() == HTTP_NOT_FOUND) {
+				log.info("Cannot find resource with URI {}.", uri);
+				return Optional.empty();
+			}
+			throw e;
+		}
 	}
 
 	private <T> T get(WebResource resource, URI uri, Class<T> responseType, String mediaType) {
-		return resource.uri(uri).accept(mediaType).get(responseType);
+		RetryPolicy<T> retryPolicy = new RetryPolicy<T>().handle(UniformInterfaceException.class)
+				.withDelay(ofSeconds(1)).withMaxRetries(3);
+		return Failsafe.with(retryPolicy).get((ClientResponse) -> resource.uri(uri).accept(mediaType)
+				.header(HttpHeaders.USER_AGENT, USER_AGENT).get(responseType));
 	}
 }

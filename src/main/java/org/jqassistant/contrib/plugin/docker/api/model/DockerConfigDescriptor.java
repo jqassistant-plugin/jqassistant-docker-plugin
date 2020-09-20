@@ -1,9 +1,9 @@
 package org.jqassistant.contrib.plugin.docker.api.model;
 
+import java.util.List;
+
 import com.buschmais.xo.neo4j.api.annotation.Label;
 import com.buschmais.xo.neo4j.api.annotation.Relation;
-
-import java.util.List;
 
 @Label("Config")
 public interface DockerConfigDescriptor extends DockerDescriptor {
@@ -38,9 +38,6 @@ public interface DockerConfigDescriptor extends DockerDescriptor {
     String getHostName();
     void setHostName(String hostName);
 
-    String getImage();
-    void setImage(String image);
-
     String getOnBuild();
     void setOnBuild(String onBuild);
 
@@ -61,6 +58,11 @@ public interface DockerConfigDescriptor extends DockerDescriptor {
 
     String getWorkingDir();
     void setWorkingDir(String workingDir);
+
+	@Relation
+	DockerImageDescriptor getImage();
+
+	void setImage(DockerImageDescriptor image);
 
     @Relation("HAS_LABEL")
     List<DockerLabelDescriptor> getLabels();

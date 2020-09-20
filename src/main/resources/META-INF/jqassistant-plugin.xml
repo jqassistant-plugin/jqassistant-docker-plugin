@@ -12,6 +12,7 @@
         <class>org.jqassistant.contrib.plugin.docker.api.model.ManifestContainsLayerDescriptor</class>
         <class>org.jqassistant.contrib.plugin.docker.api.model.DockerConfigDescriptor</class>
         <class>org.jqassistant.contrib.plugin.docker.api.model.DockerContainerConfigDescriptor</class>
+        <class>org.jqassistant.contrib.plugin.docker.api.model.DockerImageDescriptor</class>
         <class>org.jqassistant.contrib.plugin.docker.api.model.DockerLabelDescriptor</class>
     </model>
     <scope>
