@@ -1,20 +1,9 @@
 package org.jqassistant.contrib.plugin.docker.rest;
 
-import static java.util.Arrays.stream;
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-
-import org.jqassistant.contrib.plugin.docker.api.model.DockerBlobDescriptor;
-import org.jqassistant.contrib.plugin.docker.api.model.DockerConfigDescriptor;
-import org.jqassistant.contrib.plugin.docker.api.model.DockerImageDescriptor;
-import org.jqassistant.contrib.plugin.docker.api.model.DockerManifestDescriptor;
-import org.jqassistant.contrib.plugin.docker.api.model.DockerRegistryDescriptor;
-import org.jqassistant.contrib.plugin.docker.api.model.DockerRepositoryDescriptor;
-import org.jqassistant.contrib.plugin.docker.api.model.DockerTagDescriptor;
+import com.buschmais.jqassistant.plugin.common.test.AbstractPluginIT;
+import com.github.dockerjava.api.DockerClient;
+import lombok.extern.slf4j.Slf4j;
+import org.jqassistant.contrib.plugin.docker.api.model.*;
 import org.jqassistant.contrib.plugin.docker.api.scope.DockerScope;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
@@ -22,109 +11,114 @@ import org.testcontainers.images.builder.ImageFromDockerfile;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import com.buschmais.jqassistant.plugin.common.test.AbstractPluginIT;
-import com.github.dockerjava.api.DockerClient;
-import com.github.dockerjava.api.model.Image;
-import com.github.dockerjava.core.command.PushImageResultCallback;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
-import lombok.extern.slf4j.Slf4j;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @Slf4j
 @Testcontainers
 public class DockerRegistryScannerPluginIT extends AbstractPluginIT {
 
-	public static final String JQA_TEST_IMAGE = "test-image";
+    public static final String JQA_TEST_IMAGE = "test-image";
 
-	@Container
-	public GenericContainer registry = new GenericContainer("registry:latest").withExposedPorts(5000);
+    @Container
+    public GenericContainer registry = new GenericContainer("registry:latest").withExposedPorts(5000);
 
-	@TestStore(type = TestStore.Type.FILE)
-	@Test
-	public void scanRegistry() throws MalformedURLException, ExecutionException, InterruptedException {
-		DockerClient dockerClient = registry.getDockerClient();
-		createImage(dockerClient, JQA_TEST_IMAGE, "latest");
-		String repositoryUrl = registry.getHost() + ":" + registry.getFirstMappedPort();
-		String taggedImageId = pushToRegistry(dockerClient, repositoryUrl, JQA_TEST_IMAGE, "latest");
+    @TestStore(type = TestStore.Type.FILE)
+    @Test
+    public void scanRegistry() throws MalformedURLException, ExecutionException, InterruptedException {
+        DockerClient dockerClient = registry.getDockerClient();
+        createImage();
+        String repositoryUrl = registry.getHost() + ":" + registry.getFirstMappedPort();
+        String taggedImageId = pushToRegistry(dockerClient, repositoryUrl, JQA_TEST_IMAGE, "latest");
 
-		try {
-			String url = "http://" + repositoryUrl;
-			DockerRegistryDescriptor registryDescriptor = getScanner().scan(new URL(url), url, DockerScope.REGISTRY);
+        try {
+            String url = "http://" + repositoryUrl;
+            DockerRegistryDescriptor registryDescriptor = getScanner().scan(new URL(url), url, DockerScope.REGISTRY);
 
-			store.beginTransaction();
-			List<DockerRepositoryDescriptor> repositories = registryDescriptor.getContainsRepositories();
-			assertThat(repositories.size()).isEqualTo(1);
-			DockerRepositoryDescriptor repositoryDescriptor = repositories.get(0);
-			assertThat(repositoryDescriptor.getName()).isEqualTo("test-image");
-			List<DockerTagDescriptor> tags = repositoryDescriptor.getTags();
-			assertThat(tags.size()).isEqualTo(1);
-			DockerTagDescriptor tagDescriptor = tags.get(0);
-			assertThat(tagDescriptor.getName()).isEqualTo("latest");
-			DockerManifestDescriptor manifestDescriptor = tagDescriptor.getManifest();
-			verifyManifest(manifestDescriptor);
+            store.beginTransaction();
+            List<DockerRepositoryDescriptor> repositories = registryDescriptor.getContainsRepositories();
+            assertThat(repositories.size()).isEqualTo(1);
+            DockerRepositoryDescriptor repository = repositories.get(0);
+            assertThat(repository.getName()).isEqualTo("test-image");
+            List<DockerTagDescriptor> tags = repository.getTags();
+            assertThat(tags.size()).isEqualTo(1);
+            DockerTagDescriptor tagDescriptor = tags.get(0);
+            assertThat(tagDescriptor.getName()).isEqualTo("latest");
+            DockerManifestDescriptor manifestDescriptor = tagDescriptor.getManifest();
+            verifyManifest(manifestDescriptor);
 
-			List<DockerBlobDescriptor> blobs = repositoryDescriptor.getBlobs();
-			assertThat(blobs.size()).isEqualTo(2);
-			assertThat(blobs).allMatch(blob -> blob.getRepository() == repositoryDescriptor);
+            List<DockerBlobDescriptor> blobs = repository.getBlobs();
+            assertThat(blobs.size()).isEqualTo(2);
+            assertThat(blobs).allMatch(blob -> blob.getDigest().startsWith("sha256:"));
+            assertThat(blobs).allMatch(blob -> blob.getRepository() == repository);
 
-			List<DockerImageDescriptor> images = repositoryDescriptor.getImages();
-			assertThat(images.size()).isEqualTo(1);
-			assertThat(images).allMatch(image -> image.getRepository() == repositoryDescriptor);
+            List<DockerImageDescriptor> images = repository.getImages();
+            assertThat(images.size()).isEqualTo(1);
+            DockerImageDescriptor image = images.get(0);
+            assertThat(image.getDigest()).startsWith("sha256:");
+            assertThat(image.getRepository()).isEqualTo(repository);
 
-			store.commitTransaction();
-		} finally {
-			dockerClient.removeImageCmd(taggedImageId).exec();
-		}
-	}
+            store.commitTransaction();
+        } finally {
+            dockerClient.removeImageCmd(taggedImageId).exec();
+        }
+    }
 
-	private void verifyManifest(DockerManifestDescriptor manifestDescriptor) {
-		assertThat(manifestDescriptor).isNotNull();
-		assertThat(manifestDescriptor.getArchitecture()).isNotBlank();
-		assertThat(manifestDescriptor.getCreated()).isPositive();
-		assertThat(manifestDescriptor.getDigest()).isNotBlank().startsWith("sha256:");
-		assertThat(manifestDescriptor.getDockerVersion()).isNotBlank();
-		assertThat(manifestDescriptor.getOs()).isEqualTo("linux");
-		DockerConfigDescriptor dockerConfig = manifestDescriptor.getDockerConfig();
-		assertThat(dockerConfig).isNotNull();
-		assertThat(dockerConfig.isArgsEscaped()).isNull();
-		assertThat(dockerConfig.isAttachStderr()).isFalse();
-		assertThat(dockerConfig.isAttachStdin()).isFalse();
-		assertThat(dockerConfig.isAttachStdout()).isFalse();
-		assertThat(dockerConfig.getCmd()).isEqualTo(new String[] { "echo", "Hello", "World;" });
-		assertThat(dockerConfig.getDomainName()).isEmpty();
-		String[] env = dockerConfig.getEnv();
-		assertThat(env).hasSize(1);
-		assertThat(env[0]).startsWith("PATH");
-		assertThat(dockerConfig.getHostName()).isEmpty();
-		assertThat(dockerConfig.isOpenStdin()).isFalse();
-		assertThat(dockerConfig.isStdinOnce()).isFalse();
-		assertThat(dockerConfig.isTty()).isFalse();
-		assertThat(dockerConfig.getUser()).isEqualTo("helloworld");
-		assertThat(dockerConfig.getWorkingDir()).isEqualTo("/home/helloworld");
-	}
+    private void verifyManifest(DockerManifestDescriptor manifestDescriptor) {
+        assertThat(manifestDescriptor).isNotNull();
+        assertThat(manifestDescriptor.getArchitecture()).isNotBlank();
+        assertThat(manifestDescriptor.getCreated()).isPositive();
+        assertThat(manifestDescriptor.getDigest()).isNotBlank().startsWith("sha256:");
+        assertThat(manifestDescriptor.getDockerVersion()).isNotBlank();
+        assertThat(manifestDescriptor.getOs()).isEqualTo("linux");
+        verifyDockerConfig(manifestDescriptor.getDockerConfig());
+    }
 
-	private void createImage(DockerClient dockerClient, String imageId, String label)
-			throws InterruptedException, ExecutionException {
-		List<Image> images = dockerClient.listImagesCmd().exec();
-		String repoTag = imageId + ":" + label;
-		if (!images.stream().flatMap(image -> stream(image.getRepoTags() != null ? image.getRepoTags() : new String[0]))
-				.filter(tag -> repoTag.equals(tag)).findAny().isPresent()) {
-			log.info("Local test image not found, creating it.");
-			ImageFromDockerfile image = new ImageFromDockerfile(JQA_TEST_IMAGE, false)
-					.withDockerfileFromBuilder(
-							builder -> builder.from("alpine:3.2").user("helloworld").workDir("/home/helloworld")
-									.cmd("echo", "Hello", "World;").expose(80, 8080).volume("/data", "/log").build());
-			image.get();
-		}
-	}
+    private void verifyDockerConfig(DockerConfigDescriptor dockerConfig) {
+        assertThat(dockerConfig).isNotNull();
+        assertThat(dockerConfig.isArgsEscaped()).isNull();
+        assertThat(dockerConfig.isAttachStderr()).isFalse();
+        assertThat(dockerConfig.isAttachStdin()).isFalse();
+        assertThat(dockerConfig.isAttachStdout()).isFalse();
+        assertThat(dockerConfig.getCmd()).isEqualTo(new String[]{"echo", "Hello", "World;"});
+        assertThat(dockerConfig.getDomainName()).isEmpty();
+        String[] env = dockerConfig.getEnv();
+        assertThat(env).hasSize(1);
+        assertThat(env[0]).startsWith("PATH");
+        assertThat(dockerConfig.getExposedPorts()).isEqualTo(new String[]{"80/tcp", "8080/tcp"});
+        Map<String, String> labels = dockerConfig.getLabels().stream().collect(Collectors.toMap(label -> label.getName(), label -> label.getValue()));
+        assertThat(labels).containsEntry("label1", "value1").containsEntry("label2", "value2");
+        assertThat(dockerConfig.getHostName()).isEmpty();
+        assertThat(dockerConfig.isOpenStdin()).isFalse();
+        assertThat(dockerConfig.isStdinOnce()).isFalse();
+        assertThat(dockerConfig.isTty()).isFalse();
+        assertThat(dockerConfig.getUser()).isEqualTo("helloworld");
+        assertThat(dockerConfig.getWorkingDir()).isEqualTo("/home/helloworld");
+        assertThat(dockerConfig.getVolumes()).isEqualTo(new String[]{"/data", "/log"});
+    }
 
-	private String pushToRegistry(DockerClient dockerClient, String repositoryUrl, String imageId, String label)
-			throws InterruptedException {
-		dockerClient.tagImageCmd(imageId + ":" + label, repositoryUrl + "/" + imageId, label).exec();
-		String repositoryImageId = repositoryUrl + "/" + imageId + ":" + label;
-		PushImageResultCallback resultCallback = new PushImageResultCallback();
-		dockerClient.pushImageCmd(repositoryImageId).exec(resultCallback);
-		resultCallback.awaitCompletion();
-		return repositoryImageId;
-	}
+    private void createImage()
+        throws InterruptedException, ExecutionException {
+        log.info("Local test image not found, creating it.");
+        ImageFromDockerfile image = new ImageFromDockerfile(JQA_TEST_IMAGE, false)
+            .withDockerfileFromBuilder(
+                builder -> builder.from("alpine:3.2").user("helloworld").workDir("/home/helloworld")
+                    .cmd("echo", "Hello", "World;").expose(80, 8080).volume("/data", "/log").label("label1", "value1").label("label2", "value2").build());
+        image.get();
+    }
+
+    private String pushToRegistry(DockerClient dockerClient, String repositoryUrl, String imageId, String label)
+        throws InterruptedException {
+        dockerClient.tagImageCmd(imageId + ":" + label, repositoryUrl + "/" + imageId, label).exec();
+        String repositoryImageId = repositoryUrl + "/" + imageId + ":" + label;
+        dockerClient.pushImageCmd(repositoryImageId).start().awaitCompletion();
+        return repositoryImageId;
+    }
 
 }
