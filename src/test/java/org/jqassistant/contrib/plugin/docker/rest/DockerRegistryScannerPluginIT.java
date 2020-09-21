@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import org.jqassistant.contrib.plugin.docker.api.model.DockerBlobDescriptor;
+import org.jqassistant.contrib.plugin.docker.api.model.DockerConfigDescriptor;
 import org.jqassistant.contrib.plugin.docker.api.model.DockerImageDescriptor;
 import org.jqassistant.contrib.plugin.docker.api.model.DockerManifestDescriptor;
 import org.jqassistant.contrib.plugin.docker.api.model.DockerRegistryDescriptor;
@@ -37,6 +38,7 @@ public class DockerRegistryScannerPluginIT extends AbstractPluginIT {
 	@Container
 	public GenericContainer registry = new GenericContainer("registry:latest").withExposedPorts(5000);
 
+	@TestStore(type = TestStore.Type.FILE)
 	@Test
 	public void scanRegistry() throws MalformedURLException, ExecutionException, InterruptedException {
 		DockerClient dockerClient = registry.getDockerClient();
@@ -53,24 +55,51 @@ public class DockerRegistryScannerPluginIT extends AbstractPluginIT {
 			assertThat(repositories.size()).isEqualTo(1);
 			DockerRepositoryDescriptor repositoryDescriptor = repositories.get(0);
 			assertThat(repositoryDescriptor.getName()).isEqualTo("test-image");
-			List<DockerTagDescriptor> tags = repositoryDescriptor.getContainsTags();
+			List<DockerTagDescriptor> tags = repositoryDescriptor.getTags();
 			assertThat(tags.size()).isEqualTo(1);
 			DockerTagDescriptor tagDescriptor = tags.get(0);
 			assertThat(tagDescriptor.getName()).isEqualTo("latest");
 			DockerManifestDescriptor manifestDescriptor = tagDescriptor.getManifest();
-			assertThat(manifestDescriptor).isNotNull();
-			assertThat(manifestDescriptor.getDigest()).isNotBlank().startsWith("sha256:");
+			verifyManifest(manifestDescriptor);
 
-			List<DockerBlobDescriptor> blobs = repositoryDescriptor.getContainsBlobs();
-			assertThat(blobs.size()).isEqualTo(1);
+			List<DockerBlobDescriptor> blobs = repositoryDescriptor.getBlobs();
+			assertThat(blobs.size()).isEqualTo(2);
+			assertThat(blobs).allMatch(blob -> blob.getRepository() == repositoryDescriptor);
 
-			List<DockerImageDescriptor> images = repositoryDescriptor.getContainsImages();
+			List<DockerImageDescriptor> images = repositoryDescriptor.getImages();
 			assertThat(images.size()).isEqualTo(1);
+			assertThat(images).allMatch(image -> image.getRepository() == repositoryDescriptor);
 
 			store.commitTransaction();
 		} finally {
 			dockerClient.removeImageCmd(taggedImageId).exec();
 		}
+	}
+
+	private void verifyManifest(DockerManifestDescriptor manifestDescriptor) {
+		assertThat(manifestDescriptor).isNotNull();
+		assertThat(manifestDescriptor.getArchitecture()).isNotBlank();
+		assertThat(manifestDescriptor.getCreated()).isPositive();
+		assertThat(manifestDescriptor.getDigest()).isNotBlank().startsWith("sha256:");
+		assertThat(manifestDescriptor.getDockerVersion()).isNotBlank();
+		assertThat(manifestDescriptor.getOs()).isEqualTo("linux");
+		DockerConfigDescriptor dockerConfig = manifestDescriptor.getDockerConfig();
+		assertThat(dockerConfig).isNotNull();
+		assertThat(dockerConfig.isArgsEscaped()).isNull();
+		assertThat(dockerConfig.isAttachStderr()).isFalse();
+		assertThat(dockerConfig.isAttachStdin()).isFalse();
+		assertThat(dockerConfig.isAttachStdout()).isFalse();
+		assertThat(dockerConfig.getCmd()).isEqualTo(new String[] { "echo", "Hello", "World;" });
+		assertThat(dockerConfig.getDomainName()).isEmpty();
+		String[] env = dockerConfig.getEnv();
+		assertThat(env).hasSize(1);
+		assertThat(env[0]).startsWith("PATH");
+		assertThat(dockerConfig.getHostName()).isEmpty();
+		assertThat(dockerConfig.isOpenStdin()).isFalse();
+		assertThat(dockerConfig.isStdinOnce()).isFalse();
+		assertThat(dockerConfig.isTty()).isFalse();
+		assertThat(dockerConfig.getUser()).isEqualTo("helloworld");
+		assertThat(dockerConfig.getWorkingDir()).isEqualTo("/home/helloworld");
 	}
 
 	private void createImage(DockerClient dockerClient, String imageId, String label)
@@ -81,8 +110,9 @@ public class DockerRegistryScannerPluginIT extends AbstractPluginIT {
 				.filter(tag -> repoTag.equals(tag)).findAny().isPresent()) {
 			log.info("Local test image not found, creating it.");
 			ImageFromDockerfile image = new ImageFromDockerfile(JQA_TEST_IMAGE, false)
-					.withDockerfileFromBuilder(builder -> builder.from("alpine:3.2").cmd("echo", "Hello", "World;")
-							.expose(80, 8080).volume("/data", "/log").build());
+					.withDockerfileFromBuilder(
+							builder -> builder.from("alpine:3.2").user("helloworld").workDir("/home/helloworld")
+									.cmd("echo", "Hello", "World;").expose(80, 8080).volume("/data", "/log").build());
 			image.get();
 		}
 	}

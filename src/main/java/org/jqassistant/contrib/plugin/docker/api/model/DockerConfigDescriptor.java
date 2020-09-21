@@ -59,7 +59,7 @@ public interface DockerConfigDescriptor extends DockerDescriptor {
     String getWorkingDir();
     void setWorkingDir(String workingDir);
 
-	@Relation
+	@Relation("FOR_IMAGE")
 	DockerImageDescriptor getImage();
 
 	void setImage(DockerImageDescriptor image);

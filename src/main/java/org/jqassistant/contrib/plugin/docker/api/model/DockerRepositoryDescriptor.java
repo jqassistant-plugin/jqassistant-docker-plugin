@@ -13,13 +13,13 @@ import com.buschmais.xo.neo4j.api.annotation.Relation;
 public interface DockerRepositoryDescriptor extends DockerDescriptor, NamedDescriptor {
 
 	@Relation("CONTAINS_TAG")
-	List<DockerTagDescriptor> getContainsTags();
+	List<DockerTagDescriptor> getTags();
 
 	@Relation("CONTAINS_BLOB")
-	List<DockerBlobDescriptor> getContainsBlobs();
+	List<DockerBlobDescriptor> getBlobs();
 
 	@Relation("CONTAINS_IMAGE")
-	List<DockerImageDescriptor> getContainsImages();
+	List<DockerImageDescriptor> getImages();
 
     @ResultOf
 	@Cypher("MATCH (repository:Docker:Repository) WHERE id(repository)=$this MERGE (repository)-[:CONTAINS_TAG]->(tag:Docker:Tag{name:$name}) RETURN tag")
