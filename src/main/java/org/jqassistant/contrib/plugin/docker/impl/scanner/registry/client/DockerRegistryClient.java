@@ -85,7 +85,7 @@ public class DockerRegistryClient {
             return true;
         })
             .withDelay(ofSeconds(1)).withMaxRetries(3);
-        return Failsafe.with(retryPolicy).get((ClientResponse) -> resource.uri(uri).accept(mediaType)
+        return Failsafe.with(retryPolicy).get(() -> resource.uri(uri).accept(mediaType)
             .header(HttpHeaders.USER_AGENT, USER_AGENT).get(responseType));
     }
 }
