@@ -11,7 +11,8 @@ The jQAssistant Docker plugin provides a scanner for Docker registries gathering
 
 The scanner uses the Docker Registry HTTP API V2 as described https://docs.docker.com/registry/spec/api/[here].
 
-NOTE: There is no release available yet.
+NOTE: There is no official release available yet.
+For testing the plugin clone this repository and build it locally using ```mvn clean install```.
 
 == Usage
 
@@ -54,7 +55,7 @@ The plugin can be enabled in a Maven based project by adding it as a dependency 
                 <dependency>
                     <groupId>org.jqassistant.contrib.plugin</groupId>
                     <artifactId>jqassistant-docker-plugin</artifactId>
-                    <version>1.8.0</version>
+                    <version>1.9.0-SNAPSHOT</version>
                 </dependency>
             </dependencies>
         </plugin>
@@ -90,4 +91,4 @@ TIP: The certificate can be exported directly from a web browser (e.g. as DER en
 
 == Known Limitations
 
-* Authentication is not supported yet
+* Authentication is not (yet) supported

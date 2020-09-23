@@ -8,11 +8,11 @@ public enum DockerScope implements Scope {
 
 	@Override
 	public String getPrefix() {
-		return name();
+		return "docker";
 	}
 
 	@Override
 	public String getName() {
-		return "docker";
+		return name();
 	}
 }

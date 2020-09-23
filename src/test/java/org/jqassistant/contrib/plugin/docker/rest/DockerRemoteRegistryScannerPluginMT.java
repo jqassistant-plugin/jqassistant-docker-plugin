@@ -24,8 +24,14 @@ public class DockerRemoteRegistryScannerPluginMT extends AbstractPluginIT {
 
 	@Test
 	@TestStore(type = TestStore.Type.FILE)
-	public void scanNexus() throws MalformedURLException {
+	public void scanWfaNexus() throws MalformedURLException {
 		scanRegistry("http://am-wfa-prd.asml.com:18443", "*");
+	}
+
+	@Test
+	@TestStore(type = TestStore.Type.FILE)
+	public void scanVcpNexus() throws MalformedURLException {
+		scanRegistry("https://apps-vcp-nexus.asml.com:18443", "*", "cytopia/*");
 	}
 
 	@Test
@@ -35,8 +41,16 @@ public class DockerRemoteRegistryScannerPluginMT extends AbstractPluginIT {
 	}
 
 	private Descriptor scanRegistry(String url, String repositoryIncludePattern) throws MalformedURLException {
+		return scanRegistry(url, repositoryIncludePattern, null);
+	}
+
+	private Descriptor scanRegistry(String url, String repositoryIncludePattern, String repositoryExcludePattern)
+			throws MalformedURLException {
 		Map<String, Object> props = new HashMap<>();
 		props.put("docker.repository.include", repositoryIncludePattern);
+		if (repositoryExcludePattern != null) {
+			props.put("docker.repository.exclude", repositoryExcludePattern);
+		}
 		return getScanner(props).scan(new URL(url), url, DockerScope.REGISTRY);
 	}
 }
