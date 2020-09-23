@@ -1,0 +1,84 @@
+= jQAssistant Docker Plugin
+
+== Overview
+
+The jQAssistant Docker plugin provides a scanner for Docker registries gathering information about:
+
+- Repositories
+- Tags
+- Manifests and their configurations
+- Layers (Blobs)
+
+The scanner uses the Docker Registry HTTP API V2 as described https://docs.docker.com/registry/spec/api/[here].
+
+NOTE: There is no release available yet.
+
+== Usage
+
+=== Maven
+
+The plugin can be enabled in a Maven based project by adding it as a dependency to the jQAssistant Maven plugin:
+
+[source,xml]
+----
+<build>
+    <plugins>
+        <plugin>
+            <groupId>com.buschmais.jqassistant</groupId>
+            <artifactId>jqassistant-maven-plugin</artifactId>
+            <version>1.8.0</version>
+            <executions>
+                <execution>
+                    <id>default-cli</id>
+                    <goals>
+                        <goal>scan</goal>
+                    </goals>
+                    <configuration>
+                        <scanProperties>
+                            <docker.repositories.include>*</docker.repositories.include>
+                            <!--
+                            <docker.repositories.exclude></docker.repositories.exclude>
+                            -->
+                        </scanProperties>
+                        <scanIncludes>
+                            <scanInclude>
+                                <url>http://my-docker-registry:5000</url>
+                                <scope>docker:registry</scope>
+                            </scanInclude>
+                        </scanIncludes>
+                    </configuration>
+                </execution>
+            </executions>
+            <!-- The jqassistant-docker-plugin goes here -->
+            <dependencies>
+                <dependency>
+                    <groupId>org.jqassistant.contrib.plugin</groupId>
+                    <artifactId>jqassistant-docker-plugin</artifactId>
+                    <version>1.8.0</version>
+                </dependency>
+            </dependencies>
+        </plugin>
+    </plugins>
+</build>
+----
+
+Afterwards a scan can be triggered and the server started:
+
+----
+mvn jqassistant:scan
+mvn jqassistant:server
+----
+
+=== Command Line Distribution
+
+Download the shaded JAR file from https://search.maven.org/artifact/org.jqassistant.contrib.plugin/jqassistant-docker-plugin[Maven Central] and put it into the `/plugins` folder of the distribution.
+
+----
+bin/jqassistant.sh scan -u docker:registry::http://my-docker-registry:5000
+bin/jqassistant.sh server
+----
+
+== Known Limitations
+
+* Authentication is not supported yet
+

@@ -28,6 +28,7 @@ import com.buschmais.jqassistant.core.scanner.api.Scope;
 import com.buschmais.jqassistant.plugin.common.api.scanner.AbstractScannerPlugin;
 import com.buschmais.jqassistant.plugin.common.api.scanner.filesystem.FilePatternMatcher;
 import com.buschmais.xo.api.Query;
+import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 
@@ -73,11 +74,10 @@ public class DockerRegistryScannerPlugin extends AbstractScannerPlugin<URL, Dock
 		List<String> tags = registryClient.getTags(repository).getTags();
 		log.info("Repository '{}' contains {} tags.", repository, tags.size());
 		DockerRepositoryDescriptor repositoryDescriptor = registryDescriptor.resolveRepository(repository);
-		LoadingCache<Manifest.BlobReference, DockerBlobDescriptor> blobDescriptorCache = Caffeine.newBuilder()
-				.maximumSize(256).build(blobReference -> repositoryDescriptor.resolveBlob(blobReference.getDigest(),
-						blobReference.getSize()));
-		LoadingCache<String, DockerImageDescriptor> imageDescriptorCache = Caffeine.newBuilder().maximumSize(256)
-				.build(image -> repositoryDescriptor.resolveImage(image));
+		LoadingCache<Manifest.BlobReference, DockerBlobDescriptor> blobDescriptorCache = createCache(
+				blobReference -> repositoryDescriptor.resolveBlob(blobReference.getDigest(), blobReference.getSize()));
+		LoadingCache<String, DockerImageDescriptor> imageDescriptorCache = createCache(
+				image -> repositoryDescriptor.resolveImage(image));
 		for (String tag : tags) {
 			log.info("Processing '{}:{}'.", repository, tag);
 			DockerTagDescriptor dockerTagDescriptor = repositoryDescriptor.resolveTag(tag);
@@ -89,6 +89,10 @@ public class DockerRegistryScannerPlugin extends AbstractScannerPlugin<URL, Dock
 		}
 	}
 
+	private <K, V> LoadingCache<K, V> createCache(CacheLoader<K, V> cacheLoader) {
+		return Caffeine.newBuilder().maximumSize(256).build(cacheLoader);
+	}
+
 	private DockerManifestDescriptor scanManifest(String repository, Manifest manifest,
 			LoadingCache<String, DockerImageDescriptor> imageDescriptorCache,
 			LoadingCache<Manifest.BlobReference, DockerBlobDescriptor> blobDescriptorCache,
@@ -98,6 +102,7 @@ public class DockerRegistryScannerPlugin extends AbstractScannerPlugin<URL, Dock
 		Query.Result<Query.Result.CompositeRowObject> result = context.getStore()
 				.executeQuery("MATCH (manifest:Docker:Manifest{digest:$digest}) RETURN manifest", params);
 		if (result.hasResult()) {
+			// Manifest has already been scanned, skip.
 			return result.getSingleResult().get("manifest", DockerManifestDescriptor.class);
 		}
 		DockerManifestDescriptor manifestDescriptor = context.getStore().create(DockerManifestDescriptor.class);
