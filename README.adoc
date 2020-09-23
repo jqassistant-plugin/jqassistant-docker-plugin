@@ -102,19 +102,19 @@ RETURN
 ----
 
 [source,cypher]
-.All tags for repository ```neo4j```.
+.All tags for repository ```centos```.
 ----
 MATCH
-  (repository:Docker:Repository{name:'neo4j'})-[:CONTAINS_TAG]->(tag:Docker:Tag)
+  (repository:Docker:Repository{name:'centos'})-[:CONTAINS_TAG]->(tag:Docker:Tag)
 RETURN
   tag.name
 ----
 
 [source,cypher]
-.Manifest, config, labels and image for repository ```neo4j``` with the tag ```latest```.
+.Manifest, config, labels and image for repository ```centos``` with the tag ```latest```.
 ----
 MATCH
-  (repository:Docker:Repository{name:'neo4j'})-[:CONTAINS_TAG]->(tag:Docker:Tag{name:'latest'}),
+  (repository:Docker:Repository{name:'centos'})-[:CONTAINS_TAG]->(tag:Docker:Tag{name:'latest'}),
   (tag)-[:HAS_MANIFEST]->(manifest:Docker:Manifest)-[:HAS_CONFIG]->(config:Docker:Config)
 OPTIONAL MATCH
   (config)-[:HAS_LABEL]->(label:Docker:Label)
@@ -125,10 +125,10 @@ RETURN
 ----
 
 [source,cypher]
-.Layers for repository ```neo4j``` with the tag ```latest```.
+.Layers for repository ```centos``` with the tag ```latest```.
 ----
 MATCH
-  (repository:Docker:Repository{name:'neo4j'})-[:CONTAINS_TAG]->(tag:Docker:Tag{name:'latest'}),
+  (repository:Docker:Repository{name:'centos'})-[:CONTAINS_TAG]->(tag:Docker:Tag{name:'latest'}),
   (tag)-[:HAS_MANIFEST]->(manifest:Docker:Manifest),
   (manifest:Docker:Manifest)-[containsLayer:CONTAINS_LAYER]->(layer:Docker:Blob)
 RETURN
