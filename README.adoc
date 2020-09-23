@@ -78,7 +78,16 @@ bin/jqassistant.sh scan -u docker:registry::http://my-docker-registry:5000
 bin/jqassistant.sh server
 ----
 
+=== Self-Signed Certificates
+
+If the Docker registry uses HTTPS with a self-signed certificate the latter must be imported into the keystore of the Java Runtime Environment:
+
+----
+$JAVA_HOME/bin/keytool -import -alias JIRA -file jira.crt -keystore $JAVA_HOME/lib/security/cacerts
+----
+
+TIP: The certificate can be exported directly from a web browser (e.g. as DER encoded-binary X509), the default passwort of the JRE keystore is `changeit`.
+
 == Known Limitations
 
 * Authentication is not supported yet
-
