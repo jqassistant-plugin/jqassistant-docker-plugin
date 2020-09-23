@@ -1,3 +1,4 @@
+:toc: left
 = jQAssistant Docker Plugin
 
 == Overview
@@ -16,7 +17,7 @@ For testing the plugin clone this repository and build it locally using ```mvn c
 
 == Usage
 
-=== Maven
+=== Scan Using Maven
 
 The plugin can be enabled in a Maven based project by adding it as a dependency to the jQAssistant Maven plugin:
 
@@ -70,7 +71,7 @@ mvn jqassistant:scan
 mvn jqassistant:server
 ----
 
-=== Command Line Distribution
+=== Scan Using The Command Line Distribution
 
 Download the shaded JAR file from https://search.maven.org/artifact/org.jqassistant.contrib.plugin/jqassistant-docker-plugin[Maven Central] and put it into the `/plugins` folder of the distribution.
 
@@ -89,6 +90,54 @@ $JAVA_HOME/bin/keytool -import -alias JIRA -file jira.crt -keystore $JAVA_HOME/l
 
 TIP: The certificate can be exported directly from a web browser (e.g. as DER encoded-binary X509), the default passwort of the JRE keystore is `changeit`.
 
+=== Example Queries
+
+[source,cypher]
+.All registry urls and contained repositories.
+----
+MATCH
+  (registry:Docker:Registry)-[:CONTAINS_REPOSITORY]->(repository:Docker:Repository)
+RETURN
+  registry.url, collect(repository.name) AS repositories
+----
+
+[source,cypher]
+.All tags for repository ```neo4j```.
+----
+MATCH
+  (repository:Docker:Repository{name:'neo4j'})-[:CONTAINS_TAG]->(tag:Docker:Tag)
+RETURN
+  tag.name
+----
+
+[source,cypher]
+.Manifest, config, labels and image for repository ```neo4j``` with the tag ```latest```.
+----
+MATCH
+  (repository:Docker:Repository{name:'neo4j'})-[:CONTAINS_TAG]->(tag:Docker:Tag{name:'latest'}),
+  (tag)-[:HAS_MANIFEST]->(manifest:Docker:Manifest)-[:HAS_CONFIG]->(config:Docker:Config)
+OPTIONAL MATCH
+  (config)-[:HAS_LABEL]->(label:Docker:Label)
+OPTIONAL MATCH
+  (config)-[:FOR_IMAGE]->(image:Docker:Image)
+RETURN
+  manifest, config, label, image
+----
+
+[source,cypher]
+.Layers for repository ```neo4j``` with the tag ```latest```.
+----
+MATCH
+  (repository:Docker:Repository{name:'neo4j'})-[:CONTAINS_TAG]->(tag:Docker:Tag{name:'latest'}),
+  (tag)-[:HAS_MANIFEST]->(manifest:Docker:Manifest),
+  (manifest:Docker:Manifest)-[containsLayer:CONTAINS_LAYER]->(layer:Docker:Blob)
+RETURN
+  containsLayer.index, layer.digest, layer.size
+ORDER BY
+  containsLayer.index
+----
+
 == Known Limitations
 
+* Support for incremental scans is planned but not yet fully implemented/tested.
 * Authentication is not (yet) supported
