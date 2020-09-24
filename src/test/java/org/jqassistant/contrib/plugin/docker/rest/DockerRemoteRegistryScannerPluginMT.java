@@ -18,26 +18,8 @@ public class DockerRemoteRegistryScannerPluginMT extends AbstractPluginIT {
 
 	@Test
 	@TestStore(type = TestStore.Type.FILE)
-	public void scanTestBench() throws MalformedURLException {
-		scanRegistry("http://172.19.245.131:5000", "*");
-	}
-
-	@Test
-	@TestStore(type = TestStore.Type.FILE)
-	public void scanWfaNexus() throws MalformedURLException {
-		scanRegistry("http://am-wfa-prd.asml.com:18443", "*");
-	}
-
-	@Test
-	@TestStore(type = TestStore.Type.FILE)
-	public void scanVcpNexus() throws MalformedURLException {
-		scanRegistry("https://apps-vcp-nexus.asml.com:18443", "*", "cytopia/*");
-	}
-
-	@Test
-	@TestStore(type = TestStore.Type.FILE)
-	public void scanDocker() throws MalformedURLException {
-		scanRegistry("http://172.19.245.131:5000", "*");
+	public void scanLocalRegistry() throws MalformedURLException {
+		scanRegistry("http://localhost:5000", "*");
 	}
 
 	private Descriptor scanRegistry(String url, String repositoryIncludePattern) throws MalformedURLException {
