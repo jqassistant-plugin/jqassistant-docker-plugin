@@ -81,11 +81,9 @@ public class DockerRegistryScannerPlugin extends AbstractScannerPlugin<URL, Dock
 		for (String tag : tags) {
 			log.info("Processing '{}:{}'.", repository, tag);
 			DockerTagDescriptor dockerTagDescriptor = repositoryDescriptor.resolveTag(tag);
-			if (dockerTagDescriptor.getManifest() == null) {
-				registryClient.getManifest(repository, tag)
-						.ifPresent(manifest -> dockerTagDescriptor.setManifest(scanManifest(repository, manifest,
-								imageDescriptorCache, blobDescriptorCache, registryClient, context)));
-			}
+			registryClient.getManifest(repository, tag)
+					.ifPresent(manifest -> dockerTagDescriptor.setManifest(scanManifest(repository, manifest,
+							imageDescriptorCache, blobDescriptorCache, registryClient, context)));
 		}
 	}
 
