@@ -136,13 +136,11 @@ public class DockerRegistryScannerPluginIT extends AbstractPluginIT {
 						.workDir("/home/helloworld").cmd("echo", "Hello", value).expose(80, 8080)
 						.volume("/data", "/log").label("label1", "value1").label("label2", "value2").build());
 		String imageId = image.get();
-		try {
-			dockerClient.tagImageCmd(JQA_TEST_IMAGE + ":" + tag, repositoryUrl + "/" + JQA_TEST_IMAGE, tag).exec();
-			String repositoryImageId = repositoryUrl + "/" + JQA_TEST_IMAGE + ":" + tag;
-			dockerClient.pushImageCmd(repositoryImageId).start().awaitCompletion();
-		} finally {
-			dockerClient.removeImageCmd(imageId).exec();
-		}
+		dockerClient.tagImageCmd(JQA_TEST_IMAGE + ":" + tag, repositoryUrl + "/" + JQA_TEST_IMAGE, tag).exec();
+		dockerClient.removeImageCmd(imageId).exec();
+		String repositoryImageId = repositoryUrl + "/" + JQA_TEST_IMAGE + ":" + tag;
+		dockerClient.pushImageCmd(repositoryImageId).start().awaitCompletion();
+		dockerClient.removeImageCmd(repositoryImageId).exec();
 	}
 
 	private DockerRegistryDescriptor scanRegistry() throws MalformedURLException {

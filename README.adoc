@@ -12,6 +12,8 @@ The jQAssistant Docker plugin provides a scanner for Docker registries gathering
 
 The scanner uses the Docker Registry HTTP API V2 as described https://docs.docker.com/registry/spec/api/[here].
 
+Incremental scans are supported, i.e. new or updated tags will be detected.
+
 NOTE: There is no official release available yet.
 For testing the plugin clone this repository and build it locally using ```mvn clean install```.
 
@@ -139,5 +141,4 @@ ORDER BY
 
 == Known Limitations
 
-* Support for incremental scans is planned but not yet fully implemented/tested.
 * Authentication is not (yet) supported
