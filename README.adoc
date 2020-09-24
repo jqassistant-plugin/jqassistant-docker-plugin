@@ -15,9 +15,9 @@ The scanner uses the Docker Registry HTTP API V2 as described https://docs.docke
 NOTE: There is no official release available yet.
 For testing the plugin clone this repository and build it locally using ```mvn clean install```.
 
-== Usage
+== Scan Docker Registry
 
-=== Scan Using Maven
+=== Maven
 
 The plugin can be enabled in a Maven based project by adding it as a dependency to the jQAssistant Maven plugin:
 
@@ -71,7 +71,7 @@ mvn jqassistant:scan
 mvn jqassistant:server
 ----
 
-=== Scan Using The Command Line Distribution
+=== Command Line Distribution
 
 Download the shaded JAR file from https://search.maven.org/artifact/org.jqassistant.contrib.plugin/jqassistant-docker-plugin[Maven Central] and put it into the `/plugins` folder of the distribution.
 
@@ -90,7 +90,7 @@ $JAVA_HOME/bin/keytool -import -alias JIRA -file jira.crt -keystore $JAVA_HOME/l
 
 TIP: The certificate can be exported directly from a web browser (e.g. as DER encoded-binary X509), the default passwort of the JRE keystore is `changeit`.
 
-=== Example Queries
+== Example Queries
 
 [source,cypher]
 .All registry urls and contained repositories.
@@ -125,7 +125,7 @@ RETURN
 ----
 
 [source,cypher]
-.Layers for repository ```centos``` with the tag ```latest```.
+.Layers for repository ```centos``` with tag ```latest```.
 ----
 MATCH
   (repository:Docker:Repository{name:'centos'})-[:CONTAINS_TAG]->(tag:Docker:Tag{name:'latest'}),
