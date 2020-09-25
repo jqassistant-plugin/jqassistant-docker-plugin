@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.jqassistant.contrib.plugin.docker.api.scope.DockerScope;
+import org.junit.Ignore;
 import org.junit.jupiter.api.Test;
 
 import com.buschmais.jqassistant.core.store.api.model.Descriptor;
@@ -14,8 +15,9 @@ import com.buschmais.jqassistant.plugin.common.test.AbstractPluginIT;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class DockerRemoteRegistryScannerPluginMT extends AbstractPluginIT {
+public class DockerRemoteRegistryScannerPluginIT extends AbstractPluginIT {
 
+	@Ignore
 	@Test
 	@TestStore(type = TestStore.Type.FILE)
 	public void scanLocalRegistry() throws MalformedURLException {

@@ -48,7 +48,6 @@ public class DockerRegistryScannerPluginIT extends AbstractPluginIT {
 		this.repositoryUrl = registry.getHost() + ":" + registry.getFirstMappedPort();
 	}
 
-	@TestStore(type = TestStore.Type.FILE)
 	@Test
 	public void scan() throws MalformedURLException, ExecutionException, InterruptedException {
 		createAndPushTestImage("World", "latest");
@@ -80,7 +79,6 @@ public class DockerRegistryScannerPluginIT extends AbstractPluginIT {
 		store.commitTransaction();
 	}
 
-	@TestStore(type = TestStore.Type.FILE)
 	@Test
 	public void incrementalScanNewTag() throws MalformedURLException, ExecutionException, InterruptedException {
 		createAndPushTestImage("World", "1.0");
@@ -106,7 +104,6 @@ public class DockerRegistryScannerPluginIT extends AbstractPluginIT {
 		store.commitTransaction();
 	}
 
-	@TestStore(type = TestStore.Type.FILE)
 	@Test
 	public void incrementalScanOverrideTag() throws MalformedURLException, ExecutionException, InterruptedException {
 		createAndPushTestImage("World", "latest");
