@@ -11,8 +11,8 @@ import lombok.ToString;
 @ToString
 public class RepositoryTags {
 
-	private String name;
+    private String name;
 
-	private List<String> tags;
+    private List<String> tags;
 
 }

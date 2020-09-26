@@ -9,20 +9,20 @@ import com.buschmais.xo.neo4j.api.annotation.Relation.Incoming;
 @Label(value = "Blob", usingIndexedPropertyOf = DockerDigestTemplate.class)
 public interface DockerBlobDescriptor extends DockerDescriptor, DockerDigestTemplate {
 
-	String getMediaType();
+    String getMediaType();
 
-	void setMediaType(String mediaType);
+    void setMediaType(String mediaType);
 
-	long getSize();
+    long getSize();
 
-	void setSize(long size);
+    void setSize(long size);
 
-	List<DeclaresLayerDescriptor> getDeclaresLayer();
+    List<DeclaresLayerDescriptor> getDeclaresLayer();
 
-	@Incoming
-	@Relation("CONTAINS_BLOB")
-	DockerRepositoryDescriptor getRepository();
+    @Incoming
+    @Relation("CONTAINS_BLOB")
+    DockerRegistryDescriptor getRegistry();
 
-	void setRepository(DockerRepositoryDescriptor dockerRepositoryDescriptor);
+    void setRegistry(DockerRegistryDescriptor registryDescriptor);
 
 }

@@ -7,10 +7,10 @@ import com.buschmais.xo.neo4j.api.annotation.Relation.Incoming;
 @Label(value = "Image", usingIndexedPropertyOf = DockerDigestTemplate.class)
 public interface DockerImageDescriptor extends DockerDescriptor, DockerDigestTemplate {
 
-	@Incoming
-	@Relation("CONTAINS_IMAGE")
-	DockerRepositoryDescriptor getRepository();
+    @Incoming
+    @Relation("CONTAINS_IMAGE")
+    DockerRegistryDescriptor getRegistry();
 
-	void setRepository(DockerRepositoryDescriptor dockerRepositoryDescriptor);
+    void setRegistry(DockerRegistryDescriptor dockerRegistryDescriptor);
 
 }

@@ -9,14 +9,14 @@ import com.buschmais.xo.neo4j.api.annotation.Relation.Incoming;
 public interface DockerTagDescriptor extends DockerDescriptor, NamedDescriptor {
 
     @Relation("HAS_MANIFEST")
-	DockerManifestDescriptor getManifest();
+    DockerManifestDescriptor getManifest();
 
-	void setManifest(DockerManifestDescriptor manifest);
+    void setManifest(DockerManifestDescriptor manifest);
 
-	@Incoming
-	@Relation("CONTAINS_TAG")
-	DockerRegistryDescriptor getRepository();
+    @Incoming
+    @Relation("CONTAINS_TAG")
+    DockerRegistryDescriptor getRepository();
 
-	void setRepository(DockerRegistryDescriptor dockerRegistryDescriptor);
+    void setRepository(DockerRegistryDescriptor dockerRegistryDescriptor);
 
 }

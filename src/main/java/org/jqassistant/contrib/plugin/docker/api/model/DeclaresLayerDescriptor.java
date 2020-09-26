@@ -8,13 +8,13 @@ import com.buschmais.xo.neo4j.api.annotation.Relation.Outgoing;
 @Relation("DECLARES_LAYER")
 public interface DeclaresLayerDescriptor extends Descriptor {
 
-	int getIndex();
+    int getIndex();
 
-	void setIndex(int index);
+    void setIndex(int index);
 
-	@Outgoing
-	DockerManifestDescriptor getManifestDescriptor();
+    @Outgoing
+    DockerManifestDescriptor getManifestDescriptor();
 
-	@Incoming
-	DockerBlobDescriptor getBlobDescriptor();
+    @Incoming
+    DockerBlobDescriptor getBlobDescriptor();
 }

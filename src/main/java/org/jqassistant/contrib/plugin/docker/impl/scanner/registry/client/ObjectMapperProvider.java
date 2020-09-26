@@ -10,11 +10,10 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 @Provider
 public class ObjectMapperProvider implements ContextResolver<ObjectMapper> {
 
-	static final ObjectMapper OBJECT_MAPPER = new ObjectMapper().registerModules(new JavaTimeModule(),
-			new Jdk8Module());
+    static final ObjectMapper OBJECT_MAPPER = new ObjectMapper().registerModules(new JavaTimeModule(), new Jdk8Module());
 
-	@Override
-	public ObjectMapper getContext(Class<?> aClass) {
-		return OBJECT_MAPPER;
-	}
+    @Override
+    public ObjectMapper getContext(Class<?> aClass) {
+        return OBJECT_MAPPER;
+    }
 }

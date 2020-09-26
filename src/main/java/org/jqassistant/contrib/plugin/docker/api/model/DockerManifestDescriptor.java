@@ -8,31 +8,31 @@ import com.buschmais.xo.neo4j.api.annotation.Relation;
 @Label("Manifest")
 public interface DockerManifestDescriptor extends DockerBlobDescriptor {
 
-	long getCreated();
+    long getCreated();
 
-	void setCreated(long toEpochMilli);
+    void setCreated(long toEpochMilli);
 
-	String getDockerVersion();
+    String getDockerVersion();
 
-	void setDockerVersion(String dockerVersion);
+    void setDockerVersion(String dockerVersion);
 
-	String getOs();
+    String getOs();
 
-	void setOs(String os);
+    void setOs(String os);
 
-	String getArchitecture();
+    String getArchitecture();
 
-	void setArchitecture(String architecture);
+    void setArchitecture(String architecture);
 
-	List<DeclaresLayerDescriptor> getDeclaresLayers();
+    List<DeclaresLayerDescriptor> getDeclaresLayers();
 
-	@Relation("HAS_CONFIG")
-	DockerConfigDescriptor getDockerConfig();
+    @Relation("HAS_CONFIG")
+    DockerConfigDescriptor getDockerConfig();
 
-	void setDockerConfig(DockerConfigDescriptor dockerConfig);
+    void setDockerConfig(DockerConfigDescriptor dockerConfig);
 
-	@Relation("HAS_CONTAINER_CONFIG")
-	DockerContainerConfigDescriptor getDockerContainerConfig();
+    @Relation("HAS_CONTAINER_CONFIG")
+    DockerContainerConfigDescriptor getDockerContainerConfig();
 
-	void setDockerContainerConfig(DockerContainerConfigDescriptor dockerContainerConfig);
+    void setDockerContainerConfig(DockerContainerConfigDescriptor dockerContainerConfig);
 }

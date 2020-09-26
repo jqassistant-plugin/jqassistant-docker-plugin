@@ -11,6 +11,6 @@ import lombok.ToString;
 @ToString
 public class Catalog {
 
-	private List<String> repositories;
+    private List<String> repositories;
 
 }

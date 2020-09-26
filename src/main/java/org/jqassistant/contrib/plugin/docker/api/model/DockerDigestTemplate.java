@@ -4,9 +4,9 @@ import com.buschmais.xo.neo4j.api.annotation.Indexed;
 
 public interface DockerDigestTemplate {
 
-	@Indexed
-	String getDigest();
+    @Indexed
+    String getDigest();
 
-	void setDigest(String digest);
+    void setDigest(String digest);
 
 }

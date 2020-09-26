@@ -12,21 +12,15 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.jqassistant.contrib.plugin.docker.impl.scanner.registry.client.model.Catalog;
-import org.jqassistant.contrib.plugin.docker.impl.scanner.registry.client.model.Manifest;
-import org.jqassistant.contrib.plugin.docker.impl.scanner.registry.client.model.ManifestConfigMessageBodyReader;
-import org.jqassistant.contrib.plugin.docker.impl.scanner.registry.client.model.ManifestMessageBodyReader;
-import org.jqassistant.contrib.plugin.docker.impl.scanner.registry.client.model.RepositoryTags;
-
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
-
 import lombok.extern.slf4j.Slf4j;
 import net.jodah.failsafe.Failsafe;
 import net.jodah.failsafe.RetryPolicy;
+import org.jqassistant.contrib.plugin.docker.impl.scanner.registry.client.model.*;
 
 @Slf4j
 public class DockerRegistryClient {
@@ -38,8 +32,8 @@ public class DockerRegistryClient {
     private final WebResource resource;
 
     public DockerRegistryClient(URI uri) {
-        DefaultClientConfig clientConfig = new DefaultClientConfig(ObjectMapperProvider.class,
-            ManifestMessageBodyReader.class, ManifestConfigMessageBodyReader.class);
+        DefaultClientConfig clientConfig = new DefaultClientConfig(ObjectMapperProvider.class, ManifestMessageBodyReader.class,
+                ManifestConfigMessageBodyReader.class);
         Client client = Client.create(clientConfig);
         this.resource = client.resource(uri).path("v2");
     }
@@ -60,8 +54,8 @@ public class DockerRegistryClient {
         if (MEDIA_TYPE.equals(clientResponse.getHeaders().getFirst("Content-Type"))) {
             Manifest manifest = clientResponse.getEntity(Manifest.class);
             manifest.setDigest(clientResponse.getHeaders().getFirst(HEADER_DOCKER_CONTENT_DIGEST));
-			manifest.setMediaType(clientResponse.getHeaders().getFirst("Content-Type"));
-			manifest.setSize(Long.valueOf(clientResponse.getHeaders().getFirst("Content-Length")));
+            manifest.setMediaType(clientResponse.getHeaders().getFirst("Content-Type"));
+            manifest.setSize(Long.valueOf(clientResponse.getHeaders().getFirst("Content-Length")));
             return Optional.of(manifest);
         }
         return Optional.empty();
@@ -92,9 +86,7 @@ public class DockerRegistryClient {
                 return family != CLIENT_ERROR;
             }
             return true;
-        })
-            .withDelay(ofSeconds(1)).withMaxRetries(3);
-        return Failsafe.with(retryPolicy).get(() -> resource.uri(uri).accept(mediaType)
-            .header(HttpHeaders.USER_AGENT, USER_AGENT).get(responseType));
+        }).withDelay(ofSeconds(1)).withMaxRetries(3);
+        return Failsafe.with(retryPolicy).get(() -> resource.uri(uri).accept(mediaType).header(HttpHeaders.USER_AGENT, USER_AGENT).get(responseType));
     }
 }

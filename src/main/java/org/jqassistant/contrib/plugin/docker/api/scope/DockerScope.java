@@ -4,15 +4,15 @@ import com.buschmais.jqassistant.core.scanner.api.Scope;
 
 public enum DockerScope implements Scope {
 
-	REGISTRY;
+    REGISTRY;
 
-	@Override
-	public String getPrefix() {
-		return "docker";
-	}
+    @Override
+    public String getPrefix() {
+        return "docker";
+    }
 
-	@Override
-	public String getName() {
-		return name();
-	}
+    @Override
+    public String getName() {
+        return name();
+    }
 }

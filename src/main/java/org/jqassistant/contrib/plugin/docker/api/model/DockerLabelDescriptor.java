@@ -6,9 +6,11 @@ import com.buschmais.xo.neo4j.api.annotation.Label;
 public interface DockerLabelDescriptor extends DockerDescriptor {
 
     String getName();
+
     void setName(String name);
 
     String getValue();
+
     void setValue(String value);
 
 }
