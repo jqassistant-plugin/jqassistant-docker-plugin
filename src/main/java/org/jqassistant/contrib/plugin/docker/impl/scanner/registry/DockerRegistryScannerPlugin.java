@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.jqassistant.contrib.plugin.docker.api.model.DeclaresLayerDescriptor;
 import org.jqassistant.contrib.plugin.docker.api.model.DockerBlobDescriptor;
 import org.jqassistant.contrib.plugin.docker.api.model.DockerConfigDescriptor;
 import org.jqassistant.contrib.plugin.docker.api.model.DockerContainerConfigDescriptor;
@@ -16,7 +17,6 @@ import org.jqassistant.contrib.plugin.docker.api.model.DockerManifestDescriptor;
 import org.jqassistant.contrib.plugin.docker.api.model.DockerRegistryDescriptor;
 import org.jqassistant.contrib.plugin.docker.api.model.DockerRepositoryDescriptor;
 import org.jqassistant.contrib.plugin.docker.api.model.DockerTagDescriptor;
-import org.jqassistant.contrib.plugin.docker.api.model.ManifestContainsLayerDescriptor;
 import org.jqassistant.contrib.plugin.docker.api.scope.DockerScope;
 import org.jqassistant.contrib.plugin.docker.impl.scanner.registry.client.DockerRegistryClient;
 import org.jqassistant.contrib.plugin.docker.impl.scanner.registry.client.model.BlobReference;
@@ -177,9 +177,9 @@ public class DockerRegistryScannerPlugin extends AbstractScannerPlugin<URL, Dock
 		int index = 0;
 		for (BlobReference layer : layers) {
 			DockerBlobDescriptor blobDescriptor = blobDescriptorCache.get(layer);
-			ManifestContainsLayerDescriptor manifestContainsLayerDescriptor = context.getStore()
-					.create(manifestDescriptor, ManifestContainsLayerDescriptor.class, blobDescriptor);
-			manifestContainsLayerDescriptor.setIndex(index);
+			DeclaresLayerDescriptor declaresLayerDescriptor = context.getStore().create(manifestDescriptor,
+					DeclaresLayerDescriptor.class, blobDescriptor);
+			declaresLayerDescriptor.setIndex(index);
 			index++;
 		}
 	}

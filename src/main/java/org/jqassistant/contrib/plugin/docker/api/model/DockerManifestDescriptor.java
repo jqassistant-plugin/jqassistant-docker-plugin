@@ -24,7 +24,7 @@ public interface DockerManifestDescriptor extends DockerBlobDescriptor {
 
 	void setArchitecture(String architecture);
 
-	List<ManifestContainsLayerDescriptor> getContainsBlobs();
+	List<DeclaresLayerDescriptor> getDeclaresLayers();
 
 	@Relation("HAS_CONFIG")
 	DockerConfigDescriptor getDockerConfig();

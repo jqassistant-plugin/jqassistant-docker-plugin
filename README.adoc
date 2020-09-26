@@ -132,11 +132,23 @@ RETURN
 MATCH
   (repository:Docker:Repository{name:'centos'})-[:CONTAINS_TAG]->(tag:Docker:Tag{name:'latest'}),
   (tag)-[:HAS_MANIFEST]->(manifest:Docker:Manifest),
-  (manifest:Docker:Manifest)-[containsLayer:CONTAINS_LAYER]->(layer:Docker:Blob)
+  (manifest:Docker:Manifest)-[declaresLayer:DECLARES_LAYER]->(layer:Docker:Blob)
 RETURN
-  containsLayer.index, layer.digest, layer.size
+  declaresLayer.index, layer.digest, layer.size
 ORDER BY
-  containsLayer.index
+  declaresLayer.index
+----
+
+[source,cypher]
+.Aggregated blob size per repository
+----
+MATCH
+  (repository:Docker:Repository)-[:CONTAINS_TAG]->(tag:Docker:Tag),
+  (tag)-[:HAS_MANIFEST]->(:Docker:Manifest)-[:DECLARES_LAYER]->(layer:Docker:Blob)
+RETURN
+  repository.name as repository, sum(layer.size)/(1024*1024) as repositorySizeMB
+ORDER BY
+  repositorySizeMB desc
 ----
 
 == Known Limitations

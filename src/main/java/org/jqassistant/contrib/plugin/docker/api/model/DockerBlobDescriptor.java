@@ -17,7 +17,7 @@ public interface DockerBlobDescriptor extends DockerDescriptor, DockerDigestTemp
 
 	void setSize(long size);
 
-	List<ManifestContainsLayerDescriptor> getContainsBlobs();
+	List<DeclaresLayerDescriptor> getDeclaresLayer();
 
 	@Incoming
 	@Relation("CONTAINS_BLOB")
