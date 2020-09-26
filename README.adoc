@@ -63,7 +63,7 @@ The plugin can be enabled in a Maven based project by adding it as a dependency 
 </build>
 ----
 
-Afterwards a scan can be triggered and the server started:
+Afterwards a scan can be triggered and the embedded server started:
 
 ----
 mvn jqassistant:scan
@@ -72,7 +72,9 @@ mvn jqassistant:server
 
 === Command Line Distribution
 
-Download the shaded JAR file from https://search.maven.org/artifact/org.jqassistant.contrib.plugin/jqassistant-docker-plugin[Maven Central] and put it into the `/plugins` folder of the distribution.
+Download the shaded JAR file from https://search.maven.org/artifact/org.jqassistant.contrib.plugin/jqassistant-docker-plugin[Maven Central] and put it into the `/plugins` folder of the jQAssistant CLI https://search.maven.org/artifact/com.buschmais.jqassistant.cli/jqassistant-commandline-neo4jv3[distribution].
+
+The following commands trigger a scan and start the embedded server:
 
 ----
 bin/jqassistant.sh scan -u docker:registry::http://my-docker-registry:5000
@@ -90,6 +92,8 @@ $JAVA_HOME/bin/keytool -import -alias JIRA -file jira.crt -keystore $JAVA_HOME/l
 TIP: The certificate can be exported directly from a web browser (e.g. as DER encoded-binary X509), the default passwort of the JRE keystore is `changeit`.
 
 == Example Queries
+
+After starting the embedded server the Neo4j browser is available under the URL http://localhost:7474 and allows executing queries:
 
 [source,cypher]
 .All registry urls and contained repositories.
