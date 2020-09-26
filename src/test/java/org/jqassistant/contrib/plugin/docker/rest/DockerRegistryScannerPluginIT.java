@@ -17,6 +17,7 @@ import org.jqassistant.contrib.plugin.docker.api.model.DockerRegistryDescriptor;
 import org.jqassistant.contrib.plugin.docker.api.model.DockerRepositoryDescriptor;
 import org.jqassistant.contrib.plugin.docker.api.model.DockerTagDescriptor;
 import org.jqassistant.contrib.plugin.docker.api.scope.DockerScope;
+import org.jqassistant.contrib.plugin.docker.impl.scanner.registry.client.model.Manifest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
@@ -62,12 +63,14 @@ public class DockerRegistryScannerPluginIT extends AbstractPluginIT {
 		assertThat(tags.size()).isEqualTo(1);
 		DockerTagDescriptor tagDescriptor = tags.get(0);
 		assertThat(tagDescriptor.getName()).isEqualTo("latest");
-		DockerManifestDescriptor manifestDescriptor = tagDescriptor.getManifest();
-		verifyManifest(manifestDescriptor);
+		verifyManifest(tagDescriptor.getManifest());
 
 		List<DockerBlobDescriptor> blobs = repository.getBlobs();
 		assertThat(blobs.size()).isEqualTo(2);
 		assertThat(blobs).allMatch(blob -> blob.getDigest().startsWith("sha256:"));
+		assertThat(blobs)
+				.allMatch(blob -> blob.getMediaType().equals("application/vnd.docker.image.rootfs.diff.tar.gzip"));
+		assertThat(blobs).allMatch(blob -> blob.getSize() > 0);
 		assertThat(blobs).allMatch(blob -> blob.getRepository() == repository);
 
 		List<DockerImageDescriptor> images = repository.getImages();
@@ -147,6 +150,9 @@ public class DockerRegistryScannerPluginIT extends AbstractPluginIT {
 
 	private void verifyManifest(DockerManifestDescriptor manifestDescriptor) {
 		assertThat(manifestDescriptor).isNotNull();
+		assertThat(manifestDescriptor.getDigest()).startsWith("sha256:");
+		assertThat(manifestDescriptor.getMediaType()).isEqualTo(Manifest.MEDIA_TYPE);
+		assertThat(manifestDescriptor.getSize()).isNotNull().isPositive();
 		assertThat(manifestDescriptor.getArchitecture()).isNotBlank();
 		assertThat(manifestDescriptor.getCreated()).isPositive();
 		assertThat(manifestDescriptor.getDigest()).isNotBlank().startsWith("sha256:");

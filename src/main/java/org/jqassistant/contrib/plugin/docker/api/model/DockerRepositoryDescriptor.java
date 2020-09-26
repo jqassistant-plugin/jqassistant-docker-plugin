@@ -21,13 +21,16 @@ public interface DockerRepositoryDescriptor extends DockerDescriptor, NamedDescr
 	@Relation("CONTAINS_IMAGE")
 	List<DockerImageDescriptor> getImages();
 
-    @ResultOf
+	@ResultOf
 	@Cypher("MATCH (repository:Docker:Repository) WHERE id(repository)=$this MERGE (repository)-[:CONTAINS_TAG]->(tag:Docker:Tag{name:$name}) RETURN tag")
 	DockerTagDescriptor resolveTag(@Parameter("name") String name);
 
 	@ResultOf
-	@Cypher("MATCH (repository:Docker:Repository) WHERE id(repository)=$this MERGE (repository)-[:CONTAINS_BLOB]->(blob:Docker:Blob{digest:$digest}) ON CREATE SET blob.size=$size RETURN blob")
-	DockerBlobDescriptor resolveBlob(@Parameter("digest") String digest, @Parameter("size") long size);
+	@Cypher("MATCH (repository:Docker:Repository) WHERE id(repository)=$this "
+			+ "MERGE (repository)-[:CONTAINS_BLOB]->(blob:Docker:Blob{digest:$digest}) "
+			+ "ON CREATE SET blob.size=$size SET blob.mediaType=$mediaType RETURN blob")
+	DockerBlobDescriptor resolveBlob(@Parameter("digest") String digest, @Parameter("mediaType") String mediaType,
+			@Parameter("size") long size);
 
 	@ResultOf
 	@Cypher("MATCH (repository:Docker:Repository) WHERE id(repository)=$this MERGE (repository)-[:CONTAINS_IMAGE]->(image:Docker:Image{digest:$digest}) RETURN image")

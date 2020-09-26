@@ -1,25 +1,32 @@
 package org.jqassistant.contrib.plugin.docker.impl.scanner.registry.client;
 
+import static java.time.Duration.ofSeconds;
+import static javax.ws.rs.core.Response.Status.Family.CLIENT_ERROR;
+import static org.jqassistant.contrib.plugin.docker.impl.scanner.registry.client.model.Manifest.HEADER_DOCKER_CONTENT_DIGEST;
+import static org.jqassistant.contrib.plugin.docker.impl.scanner.registry.client.model.Manifest.MEDIA_TYPE;
+
+import java.net.URI;
+import java.util.Optional;
+
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import org.jqassistant.contrib.plugin.docker.impl.scanner.registry.client.model.Catalog;
+import org.jqassistant.contrib.plugin.docker.impl.scanner.registry.client.model.Manifest;
+import org.jqassistant.contrib.plugin.docker.impl.scanner.registry.client.model.ManifestConfigMessageBodyReader;
+import org.jqassistant.contrib.plugin.docker.impl.scanner.registry.client.model.ManifestMessageBodyReader;
+import org.jqassistant.contrib.plugin.docker.impl.scanner.registry.client.model.Tags;
+
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
+
 import lombok.extern.slf4j.Slf4j;
 import net.jodah.failsafe.Failsafe;
 import net.jodah.failsafe.RetryPolicy;
-import org.jqassistant.contrib.plugin.docker.impl.scanner.registry.client.model.*;
-
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import java.net.URI;
-import java.util.Optional;
-
-import static java.time.Duration.ofSeconds;
-import static javax.ws.rs.core.Response.Status.Family.CLIENT_ERROR;
-import static org.jqassistant.contrib.plugin.docker.impl.scanner.registry.client.model.Manifest.HEADER_DOCKER_CONTENT_DIGEST;
-import static org.jqassistant.contrib.plugin.docker.impl.scanner.registry.client.model.Manifest.MEDIA_TYPE;
 
 @Slf4j
 public class DockerRegistryClient {
@@ -53,6 +60,8 @@ public class DockerRegistryClient {
         if (MEDIA_TYPE.equals(clientResponse.getHeaders().getFirst("Content-Type"))) {
             Manifest manifest = clientResponse.getEntity(Manifest.class);
             manifest.setDigest(clientResponse.getHeaders().getFirst(HEADER_DOCKER_CONTENT_DIGEST));
+			manifest.setMediaType(clientResponse.getHeaders().getFirst("Content-Type"));
+			manifest.setSize(Long.valueOf(clientResponse.getHeaders().getFirst("Content-Length")));
             return Optional.of(manifest);
         }
         return Optional.empty();

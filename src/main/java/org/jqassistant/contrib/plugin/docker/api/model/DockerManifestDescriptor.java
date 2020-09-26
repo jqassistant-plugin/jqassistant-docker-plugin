@@ -6,11 +6,7 @@ import com.buschmais.xo.neo4j.api.annotation.Label;
 import com.buschmais.xo.neo4j.api.annotation.Relation;
 
 @Label("Manifest")
-public interface DockerManifestDescriptor extends DockerDescriptor {
-
-	String getDigest();
-
-	void setDigest(String digest);
+public interface DockerManifestDescriptor extends DockerBlobDescriptor {
 
 	long getCreated();
 
@@ -32,9 +28,11 @@ public interface DockerManifestDescriptor extends DockerDescriptor {
 
 	@Relation("HAS_CONFIG")
 	DockerConfigDescriptor getDockerConfig();
+
 	void setDockerConfig(DockerConfigDescriptor dockerConfig);
 
-    @Relation("HAS_CONTAINER_CONFIG")
-    DockerContainerConfigDescriptor getDockerContainerConfig();
-    void setDockerContainerConfig(DockerContainerConfigDescriptor dockerContainerConfig);
+	@Relation("HAS_CONTAINER_CONFIG")
+	DockerContainerConfigDescriptor getDockerContainerConfig();
+
+	void setDockerContainerConfig(DockerContainerConfigDescriptor dockerContainerConfig);
 }

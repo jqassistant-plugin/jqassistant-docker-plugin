@@ -7,7 +7,6 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -16,33 +15,15 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class Manifest {
+public class Manifest extends BlobReference {
 
 	public static final String HEADER_DOCKER_CONTENT_DIGEST = "Docker-Content-Digest";
 
 	public static final String MEDIA_TYPE = "application/vnd.docker.distribution.manifest.v2+json";
 
-	private String digest;
-
 	private BlobReference config;
 
 	private List<BlobReference> layers;
-
-	@JsonIgnoreProperties(ignoreUnknown = true)
-	@Getter
-	@Setter
-	@ToString
-	@EqualsAndHashCode(onlyExplicitlyIncluded = true)
-	public static class BlobReference {
-
-		private String mediaType;
-
-		private long size;
-
-		@EqualsAndHashCode.Include
-		private String digest;
-
-	}
 
 	@JsonIgnoreProperties(ignoreUnknown = true)
 	@Getter

@@ -19,6 +19,7 @@ import org.jqassistant.contrib.plugin.docker.api.model.DockerTagDescriptor;
 import org.jqassistant.contrib.plugin.docker.api.model.ManifestContainsLayerDescriptor;
 import org.jqassistant.contrib.plugin.docker.api.scope.DockerScope;
 import org.jqassistant.contrib.plugin.docker.impl.scanner.registry.client.DockerRegistryClient;
+import org.jqassistant.contrib.plugin.docker.impl.scanner.registry.client.model.BlobReference;
 import org.jqassistant.contrib.plugin.docker.impl.scanner.registry.client.model.Catalog;
 import org.jqassistant.contrib.plugin.docker.impl.scanner.registry.client.model.Manifest;
 
@@ -74,8 +75,9 @@ public class DockerRegistryScannerPlugin extends AbstractScannerPlugin<URL, Dock
 		List<String> tags = registryClient.getTags(repository).getTags();
 		log.info("Repository '{}' contains {} tags.", repository, tags.size());
 		DockerRepositoryDescriptor repositoryDescriptor = registryDescriptor.resolveRepository(repository);
-		LoadingCache<Manifest.BlobReference, DockerBlobDescriptor> blobDescriptorCache = createCache(
-				blobReference -> repositoryDescriptor.resolveBlob(blobReference.getDigest(), blobReference.getSize()));
+		LoadingCache<BlobReference, DockerBlobDescriptor> blobDescriptorCache = createCache(
+				blobReference -> repositoryDescriptor.resolveBlob(blobReference.getDigest(),
+						blobReference.getMediaType(), blobReference.getSize()));
 		LoadingCache<String, DockerImageDescriptor> imageDescriptorCache = createCache(
 				image -> repositoryDescriptor.resolveImage(image));
 		for (String tag : tags) {
@@ -87,14 +89,10 @@ public class DockerRegistryScannerPlugin extends AbstractScannerPlugin<URL, Dock
 		}
 	}
 
-	private <K, V> LoadingCache<K, V> createCache(CacheLoader<K, V> cacheLoader) {
-		return Caffeine.newBuilder().maximumSize(256).build(cacheLoader);
-	}
-
 	private DockerManifestDescriptor scanManifest(String repository, Manifest manifest,
 			LoadingCache<String, DockerImageDescriptor> imageDescriptorCache,
-			LoadingCache<Manifest.BlobReference, DockerBlobDescriptor> blobDescriptorCache,
-			DockerRegistryClient registryClient, ScannerContext context) {
+			LoadingCache<BlobReference, DockerBlobDescriptor> blobDescriptorCache, DockerRegistryClient registryClient,
+			ScannerContext context) {
 		Map<String, Object> params = new HashMap<>();
 		params.put("digest", manifest.getDigest());
 		Query.Result<Query.Result.CompositeRowObject> result = context.getStore()
@@ -105,6 +103,9 @@ public class DockerRegistryScannerPlugin extends AbstractScannerPlugin<URL, Dock
 		}
 		DockerManifestDescriptor manifestDescriptor = context.getStore().create(DockerManifestDescriptor.class);
 		manifestDescriptor.setDigest(manifest.getDigest());
+		manifestDescriptor.setMediaType(manifest.getMediaType());
+		manifestDescriptor.setSize(manifest.getSize());
+		manifestDescriptor.setMediaType(manifest.getMediaType());
 		scanManifestConfig(repository, manifest.getConfig(), manifestDescriptor, imageDescriptorCache, registryClient,
 				context);
 		scanLayers(manifest.getLayers(), manifestDescriptor, blobDescriptorCache, context);
@@ -112,7 +113,7 @@ public class DockerRegistryScannerPlugin extends AbstractScannerPlugin<URL, Dock
 		return manifestDescriptor;
 	}
 
-	private void scanManifestConfig(String repository, Manifest.BlobReference configBlobReference,
+	private void scanManifestConfig(String repository, BlobReference configBlobReference,
 			DockerManifestDescriptor manifestDescriptor,
 			LoadingCache<String, DockerImageDescriptor> imageDescriptorCache, DockerRegistryClient registryClient,
 			ScannerContext context) {
@@ -171,10 +172,10 @@ public class DockerRegistryScannerPlugin extends AbstractScannerPlugin<URL, Dock
 		return configDescriptor;
 	}
 
-	private void scanLayers(List<Manifest.BlobReference> layers, DockerManifestDescriptor manifestDescriptor,
-			LoadingCache<Manifest.BlobReference, DockerBlobDescriptor> blobDescriptorCache, ScannerContext context) {
+	private void scanLayers(List<BlobReference> layers, DockerManifestDescriptor manifestDescriptor,
+			LoadingCache<BlobReference, DockerBlobDescriptor> blobDescriptorCache, ScannerContext context) {
 		int index = 0;
-		for (Manifest.BlobReference layer : layers) {
+		for (BlobReference layer : layers) {
 			DockerBlobDescriptor blobDescriptor = blobDescriptorCache.get(layer);
 			ManifestContainsLayerDescriptor manifestContainsLayerDescriptor = context.getStore()
 					.create(manifestDescriptor, ManifestContainsLayerDescriptor.class, blobDescriptor);
@@ -198,5 +199,9 @@ public class DockerRegistryScannerPlugin extends AbstractScannerPlugin<URL, Dock
 		} catch (URISyntaxException e) {
 			throw new IOException("Cannot URI from url " + url);
 		}
+	}
+
+	private <K, V> LoadingCache<K, V> createCache(CacheLoader<K, V> cacheLoader) {
+		return Caffeine.newBuilder().maximumSize(256).build(cacheLoader);
 	}
 }
