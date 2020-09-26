@@ -16,7 +16,7 @@ import org.jqassistant.contrib.plugin.docker.impl.scanner.registry.client.model.
 import org.jqassistant.contrib.plugin.docker.impl.scanner.registry.client.model.Manifest;
 import org.jqassistant.contrib.plugin.docker.impl.scanner.registry.client.model.ManifestConfigMessageBodyReader;
 import org.jqassistant.contrib.plugin.docker.impl.scanner.registry.client.model.ManifestMessageBodyReader;
-import org.jqassistant.contrib.plugin.docker.impl.scanner.registry.client.model.Tags;
+import org.jqassistant.contrib.plugin.docker.impl.scanner.registry.client.model.RepositoryTags;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
@@ -44,9 +44,9 @@ public class DockerRegistryClient {
         this.resource = client.resource(uri).path("v2");
     }
 
-    public Tags getTags(String repository) {
+    public RepositoryTags getRepositoryTags(String repository) {
         URI tagsUri = resource.getUriBuilder().path(repository).path("tags").path("list").build();
-        return get(resource, tagsUri, Tags.class, MediaType.APPLICATION_JSON);
+        return get(resource, tagsUri, RepositoryTags.class, MediaType.APPLICATION_JSON);
     }
 
     public Catalog getCatalog() {
