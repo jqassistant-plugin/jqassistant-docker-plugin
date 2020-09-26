@@ -9,7 +9,7 @@
 
     <groupId>org.jqassistant.contrib.plugin</groupId>
     <artifactId>jqassistant-docker-plugin</artifactId>
-    <version>1.9.0-SNAPSHOT</version>
+    <version>1.8.1</version>
 
     <name>jQAssistant Docker Plugin</name>
     <description>Provides a Docker registry scanner jQAssistant.</description>
@@ -28,7 +28,7 @@
         <developerConnection>scm:git:git@github.com:dirkmahler/jqassistant-docker-plugin.git
         </developerConnection>
         <url>https://github.com/dirkmahler/jqassistant-docker-plugin</url>
-        <tag>HEAD</tag>
+        <tag>1.8.1</tag>
     </scm>
 
     <properties>
