@@ -1,14 +1,9 @@
 package org.jqassistant.contrib.plugin.docker.rest;
 
-import static java.util.stream.Collectors.toMap;
-import static java.util.stream.Collectors.toSet;
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 import com.buschmais.jqassistant.plugin.common.test.AbstractPluginIT;
@@ -24,6 +19,12 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+
+import static java.util.Collections.sort;
+import static java.util.Comparator.comparingInt;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @Slf4j
 @Testcontainers
@@ -84,17 +85,29 @@ class DockerRegistryScannerPluginIT extends AbstractPluginIT {
         Map<String, DockerRepositoryDescriptor> repositories = registry.getRepositories().stream()
                 .collect(toMap(repository -> repository.getName(), repository -> repository));
         assertThat(repositories.size()).isEqualTo(2);
-        Set<DockerBlobDescriptor> blobs1 = repositories.get("test-repository1").getTags().stream()
-                .flatMap(tag -> tag.getManifest().getDeclaresLayers().stream()).map(declaresLayer -> declaresLayer.getBlobDescriptor()).collect(toSet());
-        assertThat(blobs1).hasSize(2);
-        Set<DockerBlobDescriptor> blobs2 = repositories.get("test-repository2").getTags().stream()
-                .flatMap(tag -> tag.getManifest().getDeclaresLayers().stream()).map(declaresLayer -> declaresLayer.getBlobDescriptor()).collect(toSet());
-        assertThat(blobs2).hasSize(2);
+
         List<DockerBlobDescriptor> registryBlobs = registry.getBlobs();
         assertThat(registryBlobs.size()).isEqualTo(3);
-        assertThat(registryBlobs.containsAll(blobs1));
-        assertThat(registryBlobs.containsAll(blobs2));
+
+        verifyLayers(repositories, "test-repository1", registryBlobs);
+        verifyLayers(repositories, "test-repository2", registryBlobs);
+
         store.commitTransaction();
+    }
+
+    private void verifyLayers(Map<String, DockerRepositoryDescriptor> repositories, String repository, List<DockerBlobDescriptor> registryBlobs) {
+        List<DockerLayerDescriptor> layers = repositories.get(repository).getTags().stream().flatMap(tag -> tag.getManifest().getDeclaresLayers().stream())
+                .collect(toList());
+        assertThat(layers).hasSize(2);
+        sort(layers, comparingInt(DockerLayerDescriptor::getIndex));
+
+        DockerLayerDescriptor layer0 = layers.get(0);
+        DockerLayerDescriptor layer1 = layers.get(1);
+
+        assertThat(registryBlobs).contains(layer0.getBlob());
+        assertThat(layer0.getParentLayer()).isNull();
+        assertThat(registryBlobs).contains(layer1.getBlob());
+        assertThat(layer1.getParentLayer()).isEqualTo(layer0);
     }
 
     @Test
