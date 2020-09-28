@@ -156,10 +156,15 @@ public class DockerRegistryScannerPlugin extends AbstractScannerPlugin<URL, Dock
     private void scanLayers(List<BlobReference> layers, DockerManifestDescriptor manifestDescriptor,
             LoadingCache<BlobReference, DockerBlobDescriptor> blobDescriptorCache, ScannerContext context) {
         int index = 0;
+        DockerLayerDescriptor parentLayerDescriptor = null;
         for (BlobReference layer : layers) {
+            DockerLayerDescriptor layerDescriptor = context.getStore().create(DockerLayerDescriptor.class);
+            layerDescriptor.setParentLayer(parentLayerDescriptor);
             DockerBlobDescriptor blobDescriptor = blobDescriptorCache.get(layer);
-            DeclaresLayerDescriptor declaresLayerDescriptor = context.getStore().create(manifestDescriptor, DeclaresLayerDescriptor.class, blobDescriptor);
-            declaresLayerDescriptor.setIndex(index);
+            layerDescriptor.setBlob(blobDescriptor);
+            layerDescriptor.setIndex(index);
+            manifestDescriptor.getDeclaresLayers().add(layerDescriptor);
+            parentLayerDescriptor = layerDescriptor;
             index++;
         }
     }

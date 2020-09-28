@@ -21,46 +21,56 @@ Incremental scans are supported, i.e. new or updated tags will be detected.
 The plugin can be enabled in a Maven based project by adding it as a dependency to the jQAssistant Maven plugin:
 
 [source,xml]
+.pom.xml
 ----
-<build>
-    <plugins>
-        <plugin>
-            <groupId>com.buschmais.jqassistant</groupId>
-            <artifactId>jqassistant-maven-plugin</artifactId>
-            <version>1.8.0</version>
-            <executions>
-                <execution>
-                    <id>default-cli</id>
-                    <goals>
-                        <goal>scan</goal>
-                    </goals>
-                    <configuration>
-                        <scanProperties>
-                            <docker.repositories.include>*</docker.repositories.include>
-                            <!--
-                            <docker.repositories.exclude></docker.repositories.exclude>
-                            -->
-                        </scanProperties>
-                        <scanIncludes>
-                            <scanInclude>
-                                <url>http://my-docker-registry:5000</url>
-                                <scope>docker:registry</scope>
-                            </scanInclude>
-                        </scanIncludes>
-                    </configuration>
-                </execution>
-            </executions>
-            <!-- The jqassistant-docker-plugin goes here -->
-            <dependencies>
-                <dependency>
-                    <groupId>org.jqassistant.contrib.plugin</groupId>
-                    <artifactId>jqassistant-docker-plugin</artifactId>
-                    <version>1.8.1</version>
-                </dependency>
-            </dependencies>
-        </plugin>
-    </plugins>
-</build>
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.acme</groupId>
+    <artifactId>scan-docker-registry</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.buschmais.jqassistant</groupId>
+                <artifactId>jqassistant-maven-plugin</artifactId>
+                <version>1.8.0</version>
+                <executions>
+                    <execution>
+                        <id>default-cli</id>
+                        <goals>
+                            <goal>scan</goal>
+                        </goals>
+                        <configuration>
+                            <scanProperties>
+                                <docker.repositories.include>*</docker.repositories.include>
+                                <!--
+                                <docker.repositories.exclude>foo/*</docker.repositories.exclude>
+                                -->
+                            </scanProperties>
+                            <scanIncludes>
+                                <scanInclude>
+                                    <url>http://my-docker-registry:5000</url>
+                                    <scope>docker:registry</scope>
+                                </scanInclude>
+                            </scanIncludes>
+                        </configuration>
+                    </execution>
+                </executions>
+                <!-- The jQAssistant Docker plugin goes here -->
+                <dependencies>
+                    <dependency>
+                        <groupId>org.jqassistant.contrib.plugin</groupId>
+                        <artifactId>jqassistant-docker-plugin</artifactId>
+                        <version>1.8.1</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+        </plugins>
+    </build>
+</project>
 ----
 
 Afterwards a scan can be triggered and the embedded server started:
@@ -74,10 +84,18 @@ mvn jqassistant:server
 
 Download the shaded JAR file from https://search.maven.org/artifact/org.jqassistant.contrib.plugin/jqassistant-docker-plugin[Maven Central] and put it into the `/plugins` folder of the jQAssistant CLI https://search.maven.org/artifact/com.buschmais.jqassistant.cli/jqassistant-commandline-neo4jv3[distribution].
 
+Create a properties file for the scanner properties:
+
+.scan.properties
+----
+docker.repositories.include=*
+#docker.repositories.exclude=foo/*
+----
+
 The following commands trigger a scan and start the embedded server:
 
 ----
-bin/jqassistant.sh scan -u docker:registry::http://my-docker-registry:5000
+bin/jqassistant.sh scan -u docker:registry::http://my-docker-registry:5000 -p scan.properties
 bin/jqassistant.sh server
 ----
 
@@ -133,11 +151,11 @@ RETURN
 MATCH
   (repository:Docker:Repository{name:'centos'})-[:CONTAINS_TAG]->(tag:Docker:Tag{name:'latest'}),
   (tag)-[:HAS_MANIFEST]->(manifest:Docker:Manifest),
-  (manifest:Docker:Manifest)-[declaresLayer:DECLARES_LAYER]->(layer:Docker:Blob)
+  (manifest:Docker:Manifest)-[:DECLARES_LAYER]->(layer:Docker:Layer)-[:WITH_BLOB]->(blob:Docker:Blob)
 RETURN
-  declaresLayer.index, layer.digest, layer.size
+  layer.index, blob.digest, blob.size
 ORDER BY
-  declaresLayer.index
+  layer.index
 ----
 
 [source,cypher]
@@ -145,9 +163,9 @@ ORDER BY
 ----
 MATCH
   (repository:Docker:Repository)-[:CONTAINS_TAG]->(tag:Docker:Tag),
-  (tag)-[:HAS_MANIFEST]->(:Docker:Manifest)-[:DECLARES_LAYER]->(layer:Docker:Blob)
+  (tag)-[:HAS_MANIFEST]->(:Docker:Manifest)-[:DECLARES_LAYER]->(layer:Docker:Layer)-[:WITH_BLOB]->(blob:Docker:Blob)
 RETURN
-  repository.name as repository, sum(layer.size)/(1024*1024) as repositorySizeMB
+  repository.name as repository, sum(blob.size)/(1024*1024) as repositorySizeMB
 ORDER BY
   repositorySizeMB desc
 ----
@@ -155,3 +173,17 @@ ORDER BY
 == Known Limitations
 
 * Authentication is not (yet) supported
+
+== Changelog
+
+=== 1.8.2
+
+- introduced `Layer` nodes, i.e. `(:Manifest)-[:DECLARES_LAYER]->(:Layer)-[:WITH_BLOB]->(:Blob)` replaces `(:Manifest)-[:DECLARES_LAYER]->(:Blob)`
+
+=== 1.8.1
+
+- manage blobs per registry instead of repository, i.e. `(:Registry)-[:CONTAINS_BLOB]->(:Blob)` replaces `(:Repository)-[:CONTAINS_BLOB]->(:Blob)`
+
+=== 1.8.0
+
+- Initial release
