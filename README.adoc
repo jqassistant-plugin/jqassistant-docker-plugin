@@ -85,7 +85,7 @@ mvn jqassistant:server
 
 Download the shaded JAR file from https://search.maven.org/artifact/org.jqassistant.contrib.plugin/jqassistant-docker-plugin[Maven Central] and put it into the `/plugins` folder of the jQAssistant CLI https://search.maven.org/artifact/com.buschmais.jqassistant.cli/jqassistant-commandline-neo4jv3[distribution].
 
-Create a properties file for the scanner properties:
+Create a file containing the scanner properties:
 
 .scan.properties
 ----
