@@ -1,4 +1,5 @@
 :toc: left
+
 = jQAssistant Docker Plugin
 
 == Overview
@@ -64,7 +65,7 @@ The plugin can be enabled in a Maven based project by adding it as a dependency 
                     <dependency>
                         <groupId>org.jqassistant.contrib.plugin</groupId>
                         <artifactId>jqassistant-docker-plugin</artifactId>
-                        <version>1.8.1</version>
+                        <version>1.8.2</version>
                     </dependency>
                 </dependencies>
             </plugin>
@@ -84,7 +85,7 @@ mvn jqassistant:server
 
 Download the shaded JAR file from https://search.maven.org/artifact/org.jqassistant.contrib.plugin/jqassistant-docker-plugin[Maven Central] and put it into the `/plugins` folder of the jQAssistant CLI https://search.maven.org/artifact/com.buschmais.jqassistant.cli/jqassistant-commandline-neo4jv3[distribution].
 
-Create a properties file for the scanner properties:
+Create a file containing the scanner properties:
 
 .scan.properties
 ----
@@ -165,9 +166,9 @@ MATCH
   (repository:Docker:Repository)-[:CONTAINS_TAG]->(tag:Docker:Tag),
   (tag)-[:HAS_MANIFEST]->(:Docker:Manifest)-[:DECLARES_LAYER]->(layer:Docker:Layer)-[:WITH_BLOB]->(blob:Docker:Blob)
 RETURN
-  repository.name as repository, sum(blob.size)/(1024*1024) as repositorySizeMB
+  repository.name AS repository, sum(blob.size)/(1024*1024) AS repositorySizeMB
 ORDER BY
-  repositorySizeMB desc
+  repositorySizeMB DESC
 ----
 
 == Known Limitations
