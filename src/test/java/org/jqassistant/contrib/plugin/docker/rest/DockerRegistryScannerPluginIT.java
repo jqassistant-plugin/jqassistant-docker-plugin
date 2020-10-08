@@ -49,6 +49,7 @@ class DockerRegistryScannerPluginIT extends AbstractPluginIT {
         DockerRegistryDescriptor registry = scanRegistry();
 
         store.beginTransaction();
+        assertThat(registry.getUrl()).isEqualTo("http://" + repositoryUrl);
         List<DockerRepositoryDescriptor> repositories = registry.getRepositories();
         assertThat(repositories.size()).isEqualTo(1);
         DockerRepositoryDescriptor repository = repositories.get(0);

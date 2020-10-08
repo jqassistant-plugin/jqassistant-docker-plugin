@@ -12,7 +12,6 @@ import com.buschmais.jqassistant.core.scanner.api.ScannerContext;
 import com.buschmais.jqassistant.core.scanner.api.Scope;
 import com.buschmais.jqassistant.plugin.common.api.scanner.AbstractScannerPlugin;
 import com.buschmais.jqassistant.plugin.common.api.scanner.filesystem.FilePatternMatcher;
-import com.buschmais.xo.api.Query;
 
 import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -72,21 +71,24 @@ public class DockerRegistryScannerPlugin extends AbstractScannerPlugin<URL, Dock
         for (String tag : tags) {
             log.info("Processing '{}:{}'.", repository, tag);
             DockerTagDescriptor dockerTagDescriptor = repositoryDescriptor.resolveTag(tag);
-            registryClient.getManifest(repository, tag).ifPresent(manifest -> dockerTagDescriptor
-                    .setManifest(scanManifest(repository, manifest, imageDescriptorCache, blobDescriptorCache, registryClient, context)));
+            registryClient.getManifest(repository, tag).ifPresent(
+                    manifest -> resolveManifest(repository, manifest, dockerTagDescriptor, blobDescriptorCache, imageDescriptorCache, context, registryClient));
+        }
+    }
+
+    private void resolveManifest(String repository, Manifest manifest, DockerTagDescriptor dockerTagDescriptor,
+            LoadingCache<BlobReference, DockerBlobDescriptor> blobDescriptorCache, LoadingCache<String, DockerImageDescriptor> imageDescriptorCache,
+            ScannerContext context, DockerRegistryClient registryClient) {
+        DockerManifestDescriptor manifestDescriptor = dockerTagDescriptor.getManifest();
+        if (manifestDescriptor == null || !manifestDescriptor.getDigest().equals(manifest.getDigest())) {
+            log.info("Updating manifest for '{}:{}'.", repository, dockerTagDescriptor.getName(), manifest.getDigest());
+            manifestDescriptor = scanManifest(repository, manifest, imageDescriptorCache, blobDescriptorCache, registryClient, context);
+            dockerTagDescriptor.setManifest(manifestDescriptor);
         }
     }
 
     private DockerManifestDescriptor scanManifest(String repository, Manifest manifest, LoadingCache<String, DockerImageDescriptor> imageDescriptorCache,
             LoadingCache<BlobReference, DockerBlobDescriptor> blobDescriptorCache, DockerRegistryClient registryClient, ScannerContext context) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("digest", manifest.getDigest());
-        Query.Result<Query.Result.CompositeRowObject> result = context.getStore()
-                .executeQuery("MATCH (manifest:Docker:Manifest{digest:$digest}) RETURN manifest", params);
-        if (result.hasResult()) {
-            // Manifest has already been scanned, skip.
-            return result.getSingleResult().get("manifest", DockerManifestDescriptor.class);
-        }
         DockerManifestDescriptor manifestDescriptor = context.getStore().create(DockerManifestDescriptor.class);
         manifestDescriptor.setDigest(manifest.getDigest());
         manifestDescriptor.setMediaType(manifest.getMediaType());
@@ -94,7 +96,6 @@ public class DockerRegistryScannerPlugin extends AbstractScannerPlugin<URL, Dock
         manifestDescriptor.setMediaType(manifest.getMediaType());
         scanManifestConfig(repository, manifest.getConfig(), manifestDescriptor, imageDescriptorCache, registryClient, context);
         scanLayers(manifest.getLayers(), manifestDescriptor, blobDescriptorCache, context);
-
         return manifestDescriptor;
     }
 
