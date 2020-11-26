@@ -177,6 +177,9 @@ ORDER BY
 
 == Changelog
 
+=== 1.9.0 (Not released yet)
+- upgraded to jQAssistant 1.9.0
+
 === 1.8.2
 
 - introduced `Layer` nodes, i.e. `(:Manifest)-[:DECLARES_LAYER]->(:Layer)-[:WITH_BLOB]->(:Blob)` replaces `(:Manifest)-[:DECLARES_LAYER]->(:Blob)`
