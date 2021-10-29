@@ -101,6 +101,10 @@ public class DockerRegistryScannerPlugin extends AbstractScannerPlugin<URL, Dock
 
     private void scanManifestConfig(String repository, BlobReference configBlobReference, DockerManifestDescriptor manifestDescriptor,
             LoadingCache<String, DockerImageDescriptor> imageDescriptorCache, DockerRegistryClient registryClient, ScannerContext context) {
+        if (configBlobReference == null) {
+            log.warn("No manifest configuration reference available, skipping.");
+            return;
+        }
         registryClient.getBlob(repository, configBlobReference.getDigest(), Manifest.Content.class, configBlobReference.getMediaType()).ifPresent(content -> {
             manifestDescriptor.setArchitecture(content.getArchitecture());
             manifestDescriptor.setOs(content.getOs());
@@ -156,6 +160,10 @@ public class DockerRegistryScannerPlugin extends AbstractScannerPlugin<URL, Dock
 
     private void scanLayers(List<BlobReference> layers, DockerManifestDescriptor manifestDescriptor,
             LoadingCache<BlobReference, DockerBlobDescriptor> blobDescriptorCache, ScannerContext context) {
+        if (layers == null) {
+            log.warn("No layer references available, skipping.");
+            return;
+        }
         int index = 0;
         DockerLayerDescriptor parentLayerDescriptor = null;
         for (BlobReference layer : layers) {
