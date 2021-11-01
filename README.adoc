@@ -177,7 +177,12 @@ ORDER BY
 
 == Changelog
 
-=== 1.10.0 (Not released yet)
+=== 1.11.0
+
+- upgraded to jQAssistant 1.11.0
+- fixed NPEs when scanning a tags without valid manifest or layer references
+
+=== 1.10.0
 
 - upgraded to jQAssistant 1.10.0
 

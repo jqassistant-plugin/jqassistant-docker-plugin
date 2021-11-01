@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.jqassistant.contrib.common</groupId>
         <artifactId>parent</artifactId>
-        <version>1.10.0</version>
+        <version>1.11.0</version>
     </parent>
 
     <groupId>org.jqassistant.contrib.plugin</groupId>
@@ -112,12 +112,6 @@
             <groupId>com.buschmais.jqassistant.neo4jserver</groupId>
             <artifactId>neo4jv3</artifactId>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.buschmais.jqassistant.plugin</groupId>
-            <artifactId>java</artifactId>
-            <type>test-jar</type>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
