@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.jqassistant.contrib.common</groupId>
         <artifactId>parent</artifactId>
-        <version>1.10.0</version>
+        <version>1.11.0</version>
     </parent>
 
     <groupId>org.jqassistant.contrib.plugin</groupId>
@@ -124,9 +124,16 @@
             <artifactId>junit-jupiter-engine</artifactId>
             <scope>test</scope>
         </dependency>
+        <!--
         <dependency>
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-client</artifactId>
+            <version>${jersey-core.version}</version>
+        </dependency>
+        -->
+        <dependency>
+            <groupId>com.sun.jersey.contribs</groupId>
+            <artifactId>jersey-apache-client</artifactId>
             <version>${jersey-core.version}</version>
         </dependency>
         <dependency>
