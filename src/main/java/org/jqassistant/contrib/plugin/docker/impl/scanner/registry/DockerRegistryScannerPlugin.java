@@ -43,9 +43,14 @@ public class DockerRegistryScannerPlugin extends AbstractScannerPlugin<URL, Dock
 
     @Override
     public DockerRegistryDescriptor scan(URL url, String s, Scope scope, Scanner scanner) throws IOException {
+        try (DockerRegistryClient registryClient = getRegistryClient(url)) {
+            return scanRegistry(url, scanner, registryClient);
+        }
+    }
+
+    private DockerRegistryDescriptor scanRegistry(URL url, Scanner scanner, DockerRegistryClient registryClient) {
         log.info("Starting scan of Docker registry '{}'.", url);
         ScannerContext context = scanner.getContext();
-        DockerRegistryClient registryClient = getRegistryClient(url);
         DockerRegistryDescriptor registryDescriptor = resolveRegistryDescriptor(url, context);
         LoadingCache<BlobReference, DockerBlobDescriptor> blobCache = createCache(
                 blobReference -> registryDescriptor.resolveBlob(blobReference.getDigest(), blobReference.getMediaType(), blobReference.getSize()));

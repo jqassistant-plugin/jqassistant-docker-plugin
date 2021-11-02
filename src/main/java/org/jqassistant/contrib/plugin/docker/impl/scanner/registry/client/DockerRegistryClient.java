@@ -1,29 +1,35 @@
 package org.jqassistant.contrib.plugin.docker.impl.scanner.registry.client;
 
 import static java.time.Duration.ofSeconds;
+import static java.util.Arrays.asList;
 import static javax.ws.rs.core.Response.Status.Family.CLIENT_ERROR;
 import static org.jqassistant.contrib.plugin.docker.impl.scanner.registry.client.model.Manifest.HEADER_DOCKER_CONTENT_DIGEST;
 import static org.jqassistant.contrib.plugin.docker.impl.scanner.registry.client.model.Manifest.MEDIA_TYPE;
 
 import java.net.URI;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.UniformInterfaceException;
-import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.client.config.DefaultClientConfig;
+import com.sun.jersey.api.client.*;
+import com.sun.jersey.api.client.config.ClientConfig;
+import com.sun.jersey.client.apache.ApacheHttpClientHandler;
+import com.sun.jersey.client.apache.config.DefaultApacheHttpClientConfig;
+
 import lombok.extern.slf4j.Slf4j;
 import net.jodah.failsafe.Failsafe;
 import net.jodah.failsafe.RetryPolicy;
+
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.SimpleHttpConnectionManager;
 import org.jqassistant.contrib.plugin.docker.impl.scanner.registry.client.model.*;
 
 @Slf4j
-public class DockerRegistryClient {
+public class DockerRegistryClient implements AutoCloseable {
 
     public static final String USER_AGENT = "jQAssistant/1.x";
 
@@ -31,11 +37,28 @@ public class DockerRegistryClient {
 
     private final WebResource resource;
 
+    private SimpleHttpConnectionManager connectionManager;
+
     public DockerRegistryClient(URI uri) {
-        DefaultClientConfig clientConfig = new DefaultClientConfig(ObjectMapperProvider.class, ManifestMessageBodyReader.class,
-                ManifestConfigMessageBodyReader.class);
-        Client client = Client.create(clientConfig);
+        this.connectionManager = new SimpleHttpConnectionManager();
+        connectionManager.getParams().setConnectionTimeout(5000);
+        connectionManager.getParams().setSoTimeout(60000);
+        connectionManager.getParams().setDefaultMaxConnectionsPerHost(1);
+        HttpClient httpClient = new HttpClient(connectionManager);
+        ClientConfig config = new DefaultApacheHttpClientConfig() {
+            @Override
+            public Set<Class<?>> getClasses() {
+                return new HashSet<>(asList(ObjectMapperProvider.class, ManifestMessageBodyReader.class, ManifestConfigMessageBodyReader.class));
+            }
+        };
+        ClientHandler clientHandler = new ApacheHttpClientHandler(httpClient, config);
+        Client client = new Client(clientHandler, config);
         this.resource = client.resource(uri).path("v2");
+    }
+
+    @Override
+    public void close() {
+        connectionManager.shutdown();
     }
 
     public RepositoryTags getRepositoryTags(String repository) {
