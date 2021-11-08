@@ -37,7 +37,7 @@ The plugin can be enabled in a Maven based project by adding it as a dependency 
             <plugin>
                 <groupId>com.buschmais.jqassistant</groupId>
                 <artifactId>jqassistant-maven-plugin</artifactId>
-                <version>1.9.0</version>
+                <version>1.11.0</version>
                 <executions>
                     <execution>
                         <id>default-cli</id>
@@ -46,9 +46,10 @@ The plugin can be enabled in a Maven based project by adding it as a dependency 
                         </goals>
                         <configuration>
                             <scanProperties>
-                                <docker.repositories.include>*</docker.repositories.include>
+                                <docker.repository.include>*</docker.repository.include>
                                 <!--
-                                <docker.repositories.exclude>foo/*</docker.repositories.exclude>
+                                <docker.repository.exclude>foo/*</docker.repository.exclude>
+                                <docker.repository.updateExistingTags>true</docker.repository.updateExistingTags>
                                 -->
                             </scanProperties>
                             <scanIncludes>
@@ -65,7 +66,7 @@ The plugin can be enabled in a Maven based project by adding it as a dependency 
                     <dependency>
                         <groupId>org.jqassistant.contrib.plugin</groupId>
                         <artifactId>jqassistant-docker-plugin</artifactId>
-                        <version>1.9.0</version>
+                        <version>1.11.0</version>
                     </dependency>
                 </dependencies>
             </plugin>
@@ -89,8 +90,9 @@ Create a file containing the scanner properties:
 
 .scan.properties
 ----
-docker.repositories.include=*
-#docker.repositories.exclude=foo/*
+docker.repository.include=*
+# docker.repository.exclude=foo/*
+# docker.repository.updateExistingTags=true
 ----
 
 The following commands trigger a scan and start the embedded server:
@@ -100,12 +102,22 @@ bin/jqassistant.sh scan -u docker:registry::http://my-docker-registry:5000 -p sc
 bin/jqassistant.sh server
 ----
 
+=== Scanner Properties
+
+.Properties for the Docker Registry Scanner
+|===
+| Property                             | Description                                                                                             | Default
+| docker.repository.include            | Pattern of repositories and tags to include, e.g. `foo/*`                                               | `*`
+| docker.repository.exclude            | Pattern of repositories and tags to exclude, e.g. `bar/*`                                               |
+| docker.repository.updateExistingTags | If `true` then already scanned tags will be checked for updated manifests (slows down incremental scan) | false
+|===
+
 === Self-Signed Certificates
 
 If the Docker registry uses HTTPS with a self-signed certificate the latter must be imported into the keystore of the Java Runtime Environment:
 
 ----
-$JAVA_HOME/bin/keytool -import -alias JIRA -file jira.crt -keystore $JAVA_HOME/lib/security/cacerts
+$JAVA_HOME/bin/keytool -import -alias DOCKER -file docker.crt -keystore $JAVA_HOME/lib/security/cacerts
 ----
 
 TIP: The certificate can be exported directly from a web browser (e.g. as DER encoded-binary X509), the default passwort of the JRE keystore is `changeit`.
@@ -180,6 +192,7 @@ ORDER BY
 === 1.11.0
 
 - upgraded to jQAssistant 1.11.0
+- added scanner property `docker.repository.updateExistingTags` to enable updates of existing tags
 - fixed NPEs when scanning a tags without valid manifest or layer references
 
 === 1.10.0

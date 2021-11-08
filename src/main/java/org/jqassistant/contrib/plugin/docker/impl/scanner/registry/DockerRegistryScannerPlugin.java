@@ -16,6 +16,7 @@ import com.buschmais.jqassistant.plugin.common.api.scanner.filesystem.FilePatter
 import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
+
 import lombok.extern.slf4j.Slf4j;
 import org.jqassistant.contrib.plugin.docker.api.model.*;
 import org.jqassistant.contrib.plugin.docker.api.scope.DockerScope;
@@ -29,10 +30,13 @@ public class DockerRegistryScannerPlugin extends AbstractScannerPlugin<URL, Dock
 
     private FilePatternMatcher filePatternMatcher;
 
+    private Boolean updateExistingTags;
+
     @Override
     protected void configure() {
         String repositoryInclude = getStringProperty("docker.repository.include", "**");
         String repositoryExclude = getStringProperty("docker.repository.exclude", null);
+        this.updateExistingTags = getBooleanProperty("docker.repository.updateExistingTags", false);
         filePatternMatcher = FilePatternMatcher.builder().include(repositoryInclude).exclude(repositoryExclude).build();
     }
 
@@ -74,10 +78,14 @@ public class DockerRegistryScannerPlugin extends AbstractScannerPlugin<URL, Dock
         log.info("Repository '{}' contains {} tags.", repository, tags.size());
         DockerRepositoryDescriptor repositoryDescriptor = registryDescriptor.resolveRepository(repository);
         for (String tag : tags) {
-            log.info("Processing '{}:{}'.", repository, tag);
             DockerTagDescriptor dockerTagDescriptor = repositoryDescriptor.resolveTag(tag);
-            registryClient.getManifest(repository, tag).ifPresent(
-                    manifest -> resolveManifest(repository, manifest, dockerTagDescriptor, blobDescriptorCache, imageDescriptorCache, context, registryClient));
+            if (dockerTagDescriptor.getManifest() != null && !this.updateExistingTags) {
+                log.info("Skipping existing tag '{}:{}'.", repository, tag);
+            } else {
+                log.info("Processing '{}:{}'.", repository, tag);
+                registryClient.getManifest(repository, tag).ifPresent(manifest -> resolveManifest(repository, manifest, dockerTagDescriptor,
+                        blobDescriptorCache, imageDescriptorCache, context, registryClient));
+            }
         }
     }
 

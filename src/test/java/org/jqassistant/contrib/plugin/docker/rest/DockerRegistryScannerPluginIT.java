@@ -2,6 +2,7 @@ package org.jqassistant.contrib.plugin.docker.rest;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -9,6 +10,7 @@ import java.util.concurrent.ExecutionException;
 import com.buschmais.jqassistant.plugin.common.test.AbstractPluginIT;
 
 import com.github.dockerjava.api.DockerClient;
+
 import lombok.extern.slf4j.Slf4j;
 import org.jqassistant.contrib.plugin.docker.api.model.*;
 import org.jqassistant.contrib.plugin.docker.api.scope.DockerScope;
@@ -20,6 +22,7 @@ import org.testcontainers.images.builder.ImageFromDockerfile;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import static java.util.Collections.emptyMap;
 import static java.util.Collections.sort;
 import static java.util.Comparator.comparingInt;
 import static java.util.stream.Collectors.toList;
@@ -135,7 +138,7 @@ class DockerRegistryScannerPluginIT extends AbstractPluginIT {
     }
 
     @Test
-    void incrementalScanOverrideTag() throws MalformedURLException, ExecutionException, InterruptedException {
+    void incrementalScanKeepTag() throws MalformedURLException, ExecutionException, InterruptedException {
         createAndPushTestImage("Earth", "test-repository", "latest");
         DockerRegistryDescriptor registryDescriptor1 = scanRegistry();
         store.beginTransaction();
@@ -144,6 +147,30 @@ class DockerRegistryScannerPluginIT extends AbstractPluginIT {
 
         createAndPushTestImage("Mars", "test-repository", "latest");
         DockerRegistryDescriptor registryDescriptor2 = scanRegistry();
+        assertThat(registryDescriptor1).isEqualTo(registryDescriptor2);
+
+        store.beginTransaction();
+        List<DockerTagDescriptor> tags = registryDescriptor2.getRepositories().get(0).getTags();
+        assertThat(tags.size()).isEqualTo(1);
+        DockerTagDescriptor tagDescriptor = tags.get(0);
+        assertThat(tagDescriptor.getName()).isEqualTo("latest");
+        DockerManifestDescriptor manifest2 = tagDescriptor.getManifest();
+        assertThat(manifest1).isEqualTo(manifest2);
+        store.commitTransaction();
+    }
+
+    @Test
+    void incrementalScanUpdateTag() throws MalformedURLException, ExecutionException, InterruptedException {
+        createAndPushTestImage("Earth", "test-repository", "latest");
+        DockerRegistryDescriptor registryDescriptor1 = scanRegistry();
+        store.beginTransaction();
+        DockerManifestDescriptor manifest1 = registryDescriptor1.getRepositories().get(0).getTags().get(0).getManifest();
+        store.commitTransaction();
+
+        createAndPushTestImage("Mars", "test-repository", "latest");
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("docker.repository.updateExistingTags", true);
+        DockerRegistryDescriptor registryDescriptor2 = scanRegistry(properties);
         assertThat(registryDescriptor1).isEqualTo(registryDescriptor2);
 
         store.beginTransaction();
@@ -169,8 +196,12 @@ class DockerRegistryScannerPluginIT extends AbstractPluginIT {
     }
 
     private DockerRegistryDescriptor scanRegistry() throws MalformedURLException {
+        return scanRegistry(emptyMap());
+    }
+
+    private DockerRegistryDescriptor scanRegistry(Map<String, Object> properties) throws MalformedURLException {
         String url = "http://" + repositoryUrl;
-        return getScanner().scan(new URL(url), url, DockerScope.REGISTRY);
+        return getScanner(properties).scan(new URL(url), url, DockerScope.REGISTRY);
     }
 
     private void verifyManifest(DockerManifestDescriptor manifestDescriptor) {
