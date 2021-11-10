@@ -193,7 +193,8 @@ ORDER BY
 
 - upgraded to jQAssistant 1.11.0
 - added scanner property `docker.repository.updateExistingTags` to enable updates of existing tags
-- fixed NPEs when scanning a tags without valid manifest or layer references
+- added chain of manifests for updated tags `(:Tag)-[:HAS_MANIFEST]->(:Manifest)-[:HAS_PREVIOUS_MANIFEST*]->(:Manifest)`
+- fixed NPEs when scanning a tag without valid manifest or layer references
 
 === 1.10.0
 
