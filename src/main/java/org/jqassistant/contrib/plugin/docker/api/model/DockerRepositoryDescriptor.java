@@ -15,8 +15,4 @@ public interface DockerRepositoryDescriptor extends DockerDescriptor, NamedDescr
     @Relation("CONTAINS_TAG")
     List<DockerTagDescriptor> getTags();
 
-    @ResultOf
-    @Cypher("MATCH (repository:Docker:Repository) WHERE id(repository)=$this MERGE (repository)-[:CONTAINS_TAG]->(tag:Docker:Tag{name:$name}) RETURN tag")
-    DockerTagDescriptor resolveTag(@Parameter("name") String name);
-
 }

@@ -36,4 +36,10 @@ public interface DockerManifestDescriptor extends DockerBlobDescriptor {
     DockerContainerConfigDescriptor getDockerContainerConfig();
 
     void setDockerContainerConfig(DockerContainerConfigDescriptor dockerContainerConfig);
+
+    @Relation("HAS_PREVIOUS_MANIFEST")
+    DockerManifestDescriptor getPreviousManifest();
+
+    void setPreviousManifest(DockerManifestDescriptor dockerManifestDescriptor);
+
 }

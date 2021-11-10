@@ -13,10 +13,4 @@ public interface DockerTagDescriptor extends DockerDescriptor, NamedDescriptor {
 
     void setManifest(DockerManifestDescriptor manifest);
 
-    @Incoming
-    @Relation("CONTAINS_TAG")
-    DockerRegistryDescriptor getRepository();
-
-    void setRepository(DockerRegistryDescriptor dockerRegistryDescriptor);
-
 }

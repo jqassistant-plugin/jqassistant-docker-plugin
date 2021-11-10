@@ -6,6 +6,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.buschmais.jqassistant.core.scanner.api.Scanner;
 import com.buschmais.jqassistant.core.scanner.api.ScannerContext;
@@ -24,6 +25,8 @@ import org.jqassistant.contrib.plugin.docker.impl.scanner.registry.client.Docker
 import org.jqassistant.contrib.plugin.docker.impl.scanner.registry.client.model.BlobReference;
 import org.jqassistant.contrib.plugin.docker.impl.scanner.registry.client.model.Catalog;
 import org.jqassistant.contrib.plugin.docker.impl.scanner.registry.client.model.Manifest;
+
+import static java.util.stream.Collectors.toMap;
 
 @Slf4j
 public class DockerRegistryScannerPlugin extends AbstractScannerPlugin<URL, DockerRegistryDescriptor> {
@@ -77,27 +80,36 @@ public class DockerRegistryScannerPlugin extends AbstractScannerPlugin<URL, Dock
         List<String> tags = registryClient.getRepositoryTags(repository).getTags();
         log.info("Repository '{}' contains {} tags.", repository, tags.size());
         DockerRepositoryDescriptor repositoryDescriptor = registryDescriptor.resolveRepository(repository);
+        Map<String, DockerTagDescriptor> existingTags = repositoryDescriptor.getTags().stream().collect(toMap(tag -> tag.getName(), tag -> tag));
         for (String tag : tags) {
-            DockerTagDescriptor dockerTagDescriptor = repositoryDescriptor.resolveTag(tag);
-            if (dockerTagDescriptor.getManifest() != null && !this.updateExistingTags) {
-                log.info("Skipping existing tag '{}:{}'.", repository, tag);
-            } else {
+            DockerTagDescriptor dockerTagDescriptor = existingTags.get(tag);
+            if (dockerTagDescriptor == null || this.updateExistingTags) {
                 log.info("Processing '{}:{}'.", repository, tag);
-                registryClient.getManifest(repository, tag).ifPresent(manifest -> resolveManifest(repository, manifest, dockerTagDescriptor,
-                        blobDescriptorCache, imageDescriptorCache, context, registryClient));
+                if (dockerTagDescriptor == null) {
+                    dockerTagDescriptor = context.getStore().create(DockerTagDescriptor.class);
+                    dockerTagDescriptor.setName(tag);
+                    repositoryDescriptor.getTags().add(dockerTagDescriptor);
+                    existingTags.put(tag, dockerTagDescriptor);
+                }
+                resolveManifest(repository, blobDescriptorCache, imageDescriptorCache, context, registryClient, tag, dockerTagDescriptor);
+            } else {
+                log.info("Skipping existing tag '{}:{}'.", repository, tag);
             }
         }
     }
 
-    private void resolveManifest(String repository, Manifest manifest, DockerTagDescriptor dockerTagDescriptor,
-            LoadingCache<BlobReference, DockerBlobDescriptor> blobDescriptorCache, LoadingCache<String, DockerImageDescriptor> imageDescriptorCache,
-            ScannerContext context, DockerRegistryClient registryClient) {
-        DockerManifestDescriptor manifestDescriptor = dockerTagDescriptor.getManifest();
-        if (manifestDescriptor == null || !manifestDescriptor.getDigest().equals(manifest.getDigest())) {
-            log.info("Updating manifest for '{}:{}'.", repository, dockerTagDescriptor.getName(), manifest.getDigest());
-            manifestDescriptor = scanManifest(repository, manifest, imageDescriptorCache, blobDescriptorCache, registryClient, context);
-            dockerTagDescriptor.setManifest(manifestDescriptor);
-        }
+    private void resolveManifest(String repository, LoadingCache<BlobReference, DockerBlobDescriptor> blobDescriptorCache,
+            LoadingCache<String, DockerImageDescriptor> imageDescriptorCache, ScannerContext context, DockerRegistryClient registryClient,
+            String tag, DockerTagDescriptor dockerTagDescriptor) {
+        registryClient.getManifest(repository, tag).ifPresent(manifest -> {
+            DockerManifestDescriptor manifestDescriptor = dockerTagDescriptor.getManifest();
+            if (manifestDescriptor == null || !manifestDescriptor.getDigest().equals(manifest.getDigest())) {
+                log.info("Updating manifest for '{}:{}'.", repository, tag, manifest.getDigest());
+                DockerManifestDescriptor updatedManifestDescriptor = scanManifest(repository, manifest, imageDescriptorCache, blobDescriptorCache, registryClient, context);
+                updatedManifestDescriptor.setPreviousManifest(manifestDescriptor);
+                dockerTagDescriptor.setManifest(updatedManifestDescriptor);
+            }
+        });
     }
 
     private DockerManifestDescriptor scanManifest(String repository, Manifest manifest, LoadingCache<String, DockerImageDescriptor> imageDescriptorCache,

@@ -156,6 +156,7 @@ class DockerRegistryScannerPluginIT extends AbstractPluginIT {
         assertThat(tagDescriptor.getName()).isEqualTo("latest");
         DockerManifestDescriptor manifest2 = tagDescriptor.getManifest();
         assertThat(manifest1).isEqualTo(manifest2);
+        assertThat(manifest1.getPreviousManifest()).isNull();
         store.commitTransaction();
     }
 
@@ -180,6 +181,7 @@ class DockerRegistryScannerPluginIT extends AbstractPluginIT {
         assertThat(tagDescriptor.getName()).isEqualTo("latest");
         DockerManifestDescriptor manifest2 = tagDescriptor.getManifest();
         assertThat(manifest1).isNotEqualTo(manifest2);
+        assertThat(manifest2.getPreviousManifest()).isEqualTo(manifest1);
         store.commitTransaction();
     }
 
@@ -206,6 +208,7 @@ class DockerRegistryScannerPluginIT extends AbstractPluginIT {
 
     private void verifyManifest(DockerManifestDescriptor manifestDescriptor) {
         assertThat(manifestDescriptor).isNotNull();
+        assertThat(manifestDescriptor.getPreviousManifest()).isNull();
         assertThat(manifestDescriptor.getDigest()).startsWith("sha256:");
         assertThat(manifestDescriptor.getMediaType()).isEqualTo(Manifest.MEDIA_TYPE);
         assertThat(manifestDescriptor.getSize()).isPositive();
