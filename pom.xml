@@ -24,10 +24,10 @@
     </developers>
 
     <scm>
-        <connection>scm:git:git@github.com:dirkmahler/jqassistant-docker-plugin.git</connection>
-        <developerConnection>scm:git:git@github.com:dirkmahler/jqassistant-docker-plugin.git
+        <connection>scm:git:https://github.com/jqassistant-contrib/jqassistant-docker-plugin.git</connection>
+        <developerConnection>scm:git:https://github.com/jqassistant-contrib/jqassistant-docker-plugin.git
         </developerConnection>
-        <url>https://github.com/dirkmahler/jqassistant-docker-plugin</url>
+        <url>https://github.com/jqassistant-contrib/jqassistant-docker-plugin</url>
         <tag>HEAD</tag>
     </scm>
 
