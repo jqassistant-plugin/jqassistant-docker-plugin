@@ -1,18 +1,19 @@
 package org.jqassistant.contrib.plugin.docker.rest;
 
-import com.buschmais.jqassistant.plugin.common.test.AbstractPluginIT;
-import lombok.extern.slf4j.Slf4j;
-import org.jqassistant.contrib.plugin.docker.api.model.DockerRegistryDescriptor;
-import org.jqassistant.contrib.plugin.docker.api.scope.DockerScope;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import com.buschmais.jqassistant.core.test.plugin.AbstractPluginIT;
+
+import lombok.extern.slf4j.Slf4j;
+import org.jqassistant.contrib.plugin.docker.api.model.DockerRegistryDescriptor;
+import org.jqassistant.contrib.plugin.docker.api.scope.DockerScope;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 @Slf4j
 class DockerRemoteRegistryScannerPluginIT extends AbstractPluginIT {

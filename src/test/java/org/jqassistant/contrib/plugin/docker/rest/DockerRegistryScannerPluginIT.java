@@ -1,5 +1,12 @@
 package org.jqassistant.contrib.plugin.docker.rest;
 
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.sort;
+import static java.util.Comparator.comparingInt;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
@@ -7,10 +14,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-import com.buschmais.jqassistant.plugin.common.test.AbstractPluginIT;
+import com.buschmais.jqassistant.core.test.plugin.AbstractPluginIT;
 
 import com.github.dockerjava.api.DockerClient;
-
 import lombok.extern.slf4j.Slf4j;
 import org.jqassistant.contrib.plugin.docker.api.model.*;
 import org.jqassistant.contrib.plugin.docker.api.scope.DockerScope;
@@ -21,13 +27,6 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-
-import static java.util.Collections.emptyMap;
-import static java.util.Collections.sort;
-import static java.util.Comparator.comparingInt;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
-import static org.assertj.core.api.Assertions.assertThat;
 
 @Slf4j
 @Testcontainers
