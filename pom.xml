@@ -2,12 +2,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.jqassistant.contrib.common</groupId>
+        <groupId>org.jqassistant.plugin</groupId>
         <artifactId>parent</artifactId>
         <version>2.0.1</version>
     </parent>
 
-    <groupId>org.jqassistant.contrib.plugin</groupId>
     <artifactId>jqassistant-docker-plugin</artifactId>
     <version>2.0.0-SNAPSHOT</version>
 
@@ -24,27 +23,39 @@
     </developers>
 
     <scm>
-        <connection>scm:git:https://github.com/jqassistant-contrib/jqassistant-docker-plugin.git</connection>
-        <developerConnection>scm:git:https://github.com/jqassistant-contrib/jqassistant-docker-plugin.git
+        <connection>scm:git:https://github.com/jqassistant-plugin/jqassistant-docker-plugin.git</connection>
+        <developerConnection>scm:git:https://github.com/jqassistant-plugin/jqassistant-docker-plugin.git
         </developerConnection>
-        <url>https://github.com/jqassistant-contrib/jqassistant-docker-plugin</url>
+        <url>https://github.com/jqassistant-plugin/jqassistant-docker-plugin</url>
         <tag>HEAD</tag>
     </scm>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <jqa-plugin-common.version>2.0.0</jqa-plugin-common.version>
+        <jqa-plugin-common.version>2.0.1</jqa-plugin-common.version>
         <jersey-client.version>2.34</jersey-client.version>
-        <com.fasterxml.jackson.version>2.13.4</com.fasterxml.jackson.version>
+        <com.fasterxml.jackson.version>2.15.0</com.fasterxml.jackson.version>
         <net.jodah.failsafe.version>2.4.0</net.jodah.failsafe.version>
         <org.testcontainers.version>1.18.0</org.testcontainers.version>
-        <org.projectlombok.version>1.18.24</org.projectlombok.version>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.buschmais.jqassistant</groupId>
+                <artifactId>bom</artifactId>
+                <version>${com.buschmais.jqassistant.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <dependency>
             <groupId>com.buschmais.jqassistant.core</groupId>
             <artifactId>store</artifactId>
+            <version>${com.buschmais.jqassistant.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -56,39 +67,6 @@
             <groupId>com.buschmais.jqassistant.plugin</groupId>
             <artifactId>common</artifactId>
             <version>${jqa-plugin-common.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <!-- Test related dependencies -->
-        <dependency>
-            <groupId>com.buschmais.jqassistant.core</groupId>
-            <artifactId>test</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.assertj</groupId>
-            <artifactId>assertj-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.buschmais.jqassistant.core</groupId>
-            <artifactId>test</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.glassfish.jersey.core</groupId>
-            <artifactId>jersey-client</artifactId>
-            <version>${jersey-client.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -115,7 +93,34 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>${org.projectlombok.version}</version>
+        </dependency>
+        <!-- Test related dependencies -->
+        <dependency>
+            <groupId>com.buschmais.jqassistant.core</groupId>
+            <artifactId>test</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.core</groupId>
+            <artifactId>jersey-client</artifactId>
+            <version>${jersey-client.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>

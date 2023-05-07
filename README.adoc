@@ -19,86 +19,39 @@ Incremental scans are supported, i.e. new or updated tags will be detected.
 
 === Maven
 
-The plugin can be enabled in a Maven based project by adding it as a dependency to the jQAssistant Maven plugin:
+The plugin can be enabled in the configuration file `.jqassistant.yml`:
 
-[source,xml]
-.pom.xml
+[source,yml]
+..jqassistant.yml
 ----
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-
-    <groupId>com.acme</groupId>
-    <artifactId>scan-docker-registry</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>com.buschmais.jqassistant</groupId>
-                <artifactId>jqassistant-maven-plugin</artifactId>
-                <version>1.11.0</version>
-                <executions>
-                    <execution>
-                        <id>default-cli</id>
-                        <goals>
-                            <goal>scan</goal>
-                        </goals>
-                        <configuration>
-                            <scanProperties>
-                                <docker.repository.include>*</docker.repository.include>
-                                <!--
-                                <docker.repository.exclude>foo/*</docker.repository.exclude>
-                                <docker.repository.updateExistingTags>true</docker.repository.updateExistingTags>
-                                -->
-                            </scanProperties>
-                            <scanIncludes>
-                                <scanInclude>
-                                    <url>http://my-docker-registry:5000</url>
-                                    <scope>docker:registry</scope>
-                                </scanInclude>
-                            </scanIncludes>
-                        </configuration>
-                    </execution>
-                </executions>
-                <!-- The jQAssistant Docker plugin goes here -->
-                <dependencies>
-                    <dependency>
-                        <groupId>org.jqassistant.contrib.plugin</groupId>
-                        <artifactId>jqassistant-docker-plugin</artifactId>
-                        <version>1.11.0</version>
-                    </dependency>
-                </dependencies>
-            </plugin>
-        </plugins>
-    </build>
-</project>
+jqassistant:
+  plugins:
+    - group-id: org.jqassistant.plugins
+      artifact-id: jqassistant-docker-plugin
+      version: 2.0.0
+  scan:
+    include:
+      urls:
+        - docker:registry::http://my-docker-registry:5000
+    properties:
+      docker.repository.include: "*"
+      # docker.repository.exclude: "foo/*"
+      # docker.repository.updateExistingTags: true
 ----
 
 Afterwards a scan can be triggered and the embedded server started:
 
+[source,shell]
+.Maven
 ----
 mvn jqassistant:scan
 mvn jqassistant:server
 ----
 
-=== Command Line Distribution
-
-Download the shaded JAR file from https://search.maven.org/artifact/org.jqassistant.contrib.plugin/jqassistant-docker-plugin[Maven Central] and put it into the `/plugins` folder of the jQAssistant CLI https://search.maven.org/artifact/com.buschmais.jqassistant.cli/jqassistant-commandline-neo4jv3[distribution].
-
-Create a file containing the scanner properties:
-
-.scan.properties
+[source,shell]
+.Command Line
 ----
-docker.repository.include=*
-# docker.repository.exclude=foo/*
-# docker.repository.updateExistingTags=true
-----
-
-The following commands trigger a scan and start the embedded server:
-
-----
-bin/jqassistant.sh scan -u docker:registry::http://my-docker-registry:5000 -p scan.properties
+bin/jqassistant.sh scan
 bin/jqassistant.sh server
 ----
 
@@ -188,6 +141,11 @@ ORDER BY
 * Authentication is not (yet) supported
 
 == Changelog
+
+=== 2.0.0
+
+- upgraded to jQAssistant 2.0.0
+- changed Maven coordinates to `org.jqassistant.plugin:jqassistant-docker-plugin`
 
 === 1.11.0
 

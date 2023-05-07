@@ -4,21 +4,21 @@
                     name="Docker">
     <description>Provides a scanner for maven repositories.</description>
     <model>
-        <class>org.jqassistant.contrib.plugin.docker.api.model.DockerRegistryDescriptor</class>
-        <class>org.jqassistant.contrib.plugin.docker.api.model.DockerRepositoryDescriptor</class>
-        <class>org.jqassistant.contrib.plugin.docker.api.model.DockerTagDescriptor</class>
-        <class>org.jqassistant.contrib.plugin.docker.api.model.DockerManifestDescriptor</class>
-        <class>org.jqassistant.contrib.plugin.docker.api.model.DockerBlobDescriptor</class>
-        <class>org.jqassistant.contrib.plugin.docker.api.model.DockerLayerDescriptor</class>
-        <class>org.jqassistant.contrib.plugin.docker.api.model.DockerConfigDescriptor</class>
-        <class>org.jqassistant.contrib.plugin.docker.api.model.DockerContainerConfigDescriptor</class>
-        <class>org.jqassistant.contrib.plugin.docker.api.model.DockerImageDescriptor</class>
-        <class>org.jqassistant.contrib.plugin.docker.api.model.DockerLabelDescriptor</class>
+        <class>org.jqassistant.plugin.docker.api.model.DockerRegistryDescriptor</class>
+        <class>org.jqassistant.plugin.docker.api.model.DockerRepositoryDescriptor</class>
+        <class>org.jqassistant.plugin.docker.api.model.DockerTagDescriptor</class>
+        <class>org.jqassistant.plugin.docker.api.model.DockerManifestDescriptor</class>
+        <class>org.jqassistant.plugin.docker.api.model.DockerBlobDescriptor</class>
+        <class>org.jqassistant.plugin.docker.api.model.DockerLayerDescriptor</class>
+        <class>org.jqassistant.plugin.docker.api.model.DockerConfigDescriptor</class>
+        <class>org.jqassistant.plugin.docker.api.model.DockerContainerConfigDescriptor</class>
+        <class>org.jqassistant.plugin.docker.api.model.DockerImageDescriptor</class>
+        <class>org.jqassistant.plugin.docker.api.model.DockerLabelDescriptor</class>
     </model>
     <scope>
-        <class>org.jqassistant.contrib.plugin.docker.api.scope.DockerScope</class>
+        <class>org.jqassistant.plugin.docker.api.scope.DockerScope</class>
     </scope>
     <scanner>
-        <class>org.jqassistant.contrib.plugin.docker.impl.scanner.registry.DockerRegistryScannerPlugin</class>
+        <class>org.jqassistant.plugin.docker.impl.scanner.registry.DockerRegistryScannerPlugin</class>
     </scanner>
 </jqassistant-plugin>
