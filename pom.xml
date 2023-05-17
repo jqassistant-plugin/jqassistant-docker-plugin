@@ -8,7 +8,7 @@
     </parent>
 
     <artifactId>jqassistant-docker-plugin</artifactId>
-    <version>2.0.0-SNAPSHOT</version>
+    <version>2.0.0</version>
 
     <name>jQAssistant Docker Plugin</name>
     <description>Provides a Docker registry scanner jQAssistant.</description>
@@ -27,7 +27,7 @@
         <developerConnection>scm:git:https://github.com/jqassistant-plugin/jqassistant-docker-plugin.git
         </developerConnection>
         <url>https://github.com/jqassistant-plugin/jqassistant-docker-plugin</url>
-        <tag>HEAD</tag>
+        <tag>2.0.0</tag>
     </scm>
 
     <properties>
