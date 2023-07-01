@@ -227,7 +227,7 @@ class DockerRegistryScannerPluginIT extends AbstractPluginIT {
 
     private void verifyDockerConfig(DockerConfigDescriptor dockerConfig) {
         assertThat(dockerConfig).isNotNull();
-        assertThat(dockerConfig.isArgsEscaped()).isNotEqualTo(false); // either null or true
+        assertThat(dockerConfig.isArgsEscaped()).isNotEqualTo(Boolean.FALSE); // either null or true
         assertThat(dockerConfig.isAttachStderr()).isFalse();
         assertThat(dockerConfig.isAttachStdin()).isFalse();
         assertThat(dockerConfig.isAttachStdout()).isFalse();
