@@ -5,7 +5,6 @@ import static java.util.Collections.sort;
 import static java.util.Comparator.comparingInt;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
-import static org.assertj.core.api.Assertions.anyOf;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.net.MalformedURLException;
@@ -14,14 +13,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-
-import com.buschmais.jqassistant.core.test.plugin.AbstractPluginIT;
-
-import com.github.dockerjava.api.DockerClient;
-import lombok.extern.slf4j.Slf4j;
-
-import org.assertj.core.condition.AnyOf;
-import org.jqassistant.plugin.docker.api.model.*;
+import org.jqassistant.plugin.docker.api.model.DockerBlobDescriptor;
+import org.jqassistant.plugin.docker.api.model.DockerConfigDescriptor;
+import org.jqassistant.plugin.docker.api.model.DockerImageDescriptor;
+import org.jqassistant.plugin.docker.api.model.DockerLayerDescriptor;
+import org.jqassistant.plugin.docker.api.model.DockerManifestDescriptor;
+import org.jqassistant.plugin.docker.api.model.DockerRegistryDescriptor;
+import org.jqassistant.plugin.docker.api.model.DockerRepositoryDescriptor;
+import org.jqassistant.plugin.docker.api.model.DockerTagDescriptor;
 import org.jqassistant.plugin.docker.api.scope.DockerScope;
 import org.jqassistant.plugin.docker.impl.scanner.registry.client.model.Manifest;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,6 +29,10 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import com.buschmais.jqassistant.core.test.plugin.AbstractPluginIT;
+import com.github.dockerjava.api.DockerClient;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Testcontainers
