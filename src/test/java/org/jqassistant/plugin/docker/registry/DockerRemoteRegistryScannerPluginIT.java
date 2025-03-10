@@ -20,7 +20,6 @@ class DockerRemoteRegistryScannerPluginIT extends AbstractPluginIT {
 
     @Disabled("Only to be executed manually, not in CI build.")
     @Test
-    @TestStore(type = TestStore.Type.FILE)
     void scanLocalRegistry() throws MalformedURLException {
         DockerRegistryDescriptor registryDescriptor = scanRegistry("http://localhost:5000", "*");
         assertThat(registryDescriptor).isNotNull();
