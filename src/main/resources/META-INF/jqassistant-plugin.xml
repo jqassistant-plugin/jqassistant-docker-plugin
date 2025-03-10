@@ -1,8 +1,9 @@
-<jqassistant-plugin xmlns="http://schema.jqassistant.org/plugin/v1.8"
+<jqassistant-plugin xmlns="http://schema.jqassistant.org/plugin/v2.4"
                     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                    xsi:schemaLocation="http://schema.jqassistant.org/plugin/v1.8 https://schema.jqassistant.org/plugin/jqassistant-plugin-v1.8.xsd"
-                    name="Docker">
-    <description>Provides a scanner for maven repositories.</description>
+                    xsi:schemaLocation="http://schema.jqassistant.org/plugin/v2.4 https://jqassistant.github.io/jqassistant/current/schema/jqassistant-plugin-v2.4.xsd"
+                    name="jQAssistant Docker Plugin" id="jqassistant.plugin.docker"
+                    version="${project.version}">
+    <description>${project.description}</description>
     <model>
         <class>org.jqassistant.plugin.docker.api.model.DockerRegistryDescriptor</class>
         <class>org.jqassistant.plugin.docker.api.model.DockerRepositoryDescriptor</class>

@@ -11,7 +11,7 @@
     <version>2.2.0-SNAPSHOT</version>
 
     <name>jQAssistant Docker Plugin</name>
-    <description>Provides a Docker registry scanner jQAssistant.</description>
+    <description>The jQAssistant plugin providing a scanner for Docker registries.</description>
     <url>https://github.com/dirkmahler/jqassistant-docker-plugin</url>
 
     <developers>
